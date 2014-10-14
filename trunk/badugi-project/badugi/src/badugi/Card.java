@@ -11,6 +11,5 @@ public class Card
 		this.color = color;
 		this.figure = figure;
 		beenUsed = false;
-		
 	}
 }
