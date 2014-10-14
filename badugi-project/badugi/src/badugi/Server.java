@@ -1,10 +1,13 @@
+package badugi;
+
+
 import java.io.*;
 import java.net.*;
 
 public class Server {
 
 	private int bank;
-	private Card suit[52];
+	private Card suit[] = new Card[52];
 	int round;
 	
 	
@@ -23,9 +26,9 @@ public class Server {
 		}
 		catch(NumberFormatException e)
 		{
-			System.out.
+			System.out.println("");
 		}
-		Server serv = new Service();
+		Server serv = new Server();
 
 	}
 
