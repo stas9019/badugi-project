@@ -3,34 +3,40 @@ package Client;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+
+
 import badugi.Card;
 
 /*
  * TO DO 
- * Client's GUI
- * Establishing connection by IP and port
+ * Client's GUI: First Frame - Connection Frame, Second - Game Frame
+ * Establishing connection by IP and port in Connection Frame
  * Make ClientWorker class, which analyze players commands 
  */
-public class Client implements ActionListener{
+public class Client {
 
 	private Card playerSuit[] = new Card[4];
 	private int playerMoney;
-	private boolean dealer;
+	private boolean isDealer;
+	
+	Client()
+	{
+		ConnectionFrame connectionFrame = new ConnectionFrame(this);
+		connectionFrame.setVisible(true);
+	}
+	
 	
 	public void setAsDealer()
 	{
-		dealer = true;
+		isDealer = true;
 	}
 	
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
 	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
+	
+	public static void main(String[] args) 
+	{
+		Client client = new Client();
+	
 	}
 
 	

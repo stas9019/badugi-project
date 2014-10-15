@@ -4,6 +4,8 @@ package badugi;
 import java.io.*;
 import java.net.*;
 
+import Client.Client;
+
 /*
  * Segregate Server and ClientWorker work
  * Server makes general changes, ClientWorker only players needs
@@ -14,13 +16,17 @@ public class Server {
 
 	private int bank, playersNumber, money, port;
 	private Card suit[] = new Card[52];
-	int round = 0;
+	private int round = 0;
+	//private Client clients[];  clientWorker?
 	
 	Server(int playersNumber, int money, int port)
 	{
 		this.playersNumber = playersNumber;
 		this.money = money;
 		this.port = port;
+		
+		//clients = new Client[playersNumber]; 	 clientWorker?
+		
 		/*
 		 * initializing card suite
 		 */
