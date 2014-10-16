@@ -1,12 +1,20 @@
 package Client;
 
-import java.io.*;
-import java.net.*;
+import java.net.Socket;
 
-import javax.swing.*;
+import java.io.BufferedReader;
+//import java.io.InputStreamReader;
+import java.io.PrintWriter;
+//import java.io.IOException;
 
 import java.awt.GridLayout;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 
 /*
@@ -22,7 +30,7 @@ public class ConnectionFrame extends JFrame implements ActionListener, Runnable
 {
 	private JLabel output;
 	private JButton connectionButton;
-    private JTextField adres, port;
+    private JTextField adressField, portField;
     private Socket socket = null;
     private PrintWriter out = null;
     private BufferedReader in = null;
@@ -31,38 +39,54 @@ public class ConnectionFrame extends JFrame implements ActionListener, Runnable
 	ConnectionFrame(Client client)
 	{
 		//setFont(new Font(Font.SANS_SERIF,Font.PLAIN,40));
-		this.client = client;
-        connectionButton.addActionListener(this);
-        
+		 this.client = client;
+		 adressField = new JTextField(20);
+	     portField = new JTextField(20);
+	     
+	     connectionButton = new JButton("Connect");
+	     connectionButton.addActionListener(this);
+	     
+	     output = new JLabel();
 	}
+	
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+	public void actionPerformed(ActionEvent event) 
+	{
+		output.setText("");
+		
+		String adress = adressField.getText();
+		String port  = portField.getText();
+		
+		if(event.getSource() == connectionButton)
+			client.connectionAttempt(adress, port);
 		
 	}
 	
+	public void setOutputText(String text)
+	{
+		output.setText(text);
+	}
+	/*
+	 * Refactor f to frame in the end
+	 * */
 	public void run() 
 	{
 
 		 ConnectionFrame f = new ConnectionFrame(client);
 		 
-		 adres = new JTextField(20);
-	     port = new JTextField(20);
-
-	     connectionButton = new JButton("Connect");
-	     connectionButton.addActionListener(this);
-	        
-	     output = new JLabel();
-		
 		 f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE); // to avoid ghost processes in memory
 		 f.setLayout(new GridLayout(6,1));
 		 
 		 f.add(new JLabel("Server adress"));
-		 f.add(adres);
+		 f.add(adressField);
+		 
 		 f.add(new JLabel("Port"));
-	     f.add(port);
-	     f.add(output);
+	     f.add(portField);
+	     
 	     f.add(connectionButton);
+	     
+	     f.add(output);
+	    
 		 
 	     f.pack();
 		 f.setVisible(true);
