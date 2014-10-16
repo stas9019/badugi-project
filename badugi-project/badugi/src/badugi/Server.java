@@ -12,50 +12,63 @@ import Client.Client;
  * Make smth like in Wolf-Hare game, to allow players make decisions step-by-step
  * 
  */
-public class Server {
+public class Server 
+{
 
-	private int bank, playersNumber, money, port;
-	private Card suit[] = new Card[52];
-	private int round = 0;
-	//private Client clients[];  clientWorker?
+	private int port;
+	
+	
+	private ServerSocket socket;
+	private ClientWorker workers[];  
+	private Game game;
 	
 	Server(int playersNumber, int money, int port)
 	{
-		this.playersNumber = playersNumber;
-		this.money = money;
+		
 		this.port = port;
 		
-		//clients = new Client[playersNumber]; 	 clientWorker?
-		
-		/*
-		 * initializing card suite
-		 */
-		for(int i=1; i<=13; i++)
-		{
-			for(int j=1; j<=4; j++)
-			{
-				suit[i*j-1].setCardColor(j);
-			}
-		}
-		
+		game = new Game(playersNumber, money);
+		workers = new ClientWorker[playersNumber]; 	
+
 	}
 	
 	public void listenSocket()
 	{
-		 
-	}
-	
-	void nullBank()
-	{
-		bank = 0;
+		try 
+		{
+	    	socket = new ServerSocket(port); 
+	    } 
+		catch (IOException e) 
+		{
+			System.out.println("Could not listen on port " + port); 
+			//System.exit(-1);
+		}
+		while(true)
+		{
+		    /*Add counter to mark clients*/    
+			ClientWorker worker;
+		            
+		    try
+		    {
+		    	worker = new ClientWorker(socket.accept(), game);
+		    	Thread t = new Thread(worker);
+		   	    t.start();
+		    } 
+		    catch (IOException e) 
+		    {
+		     	System.out.println("Acception failed");
+		        //System.exit(-1);
+		    }
+		}
 	}
 	
 	/*
-	 * args[0] - Liczba uczęstników
-	 * args[1] - Ilość żetonów, które dostaje każdy z graczy
-	 * args[2] - server port
+	 * args[0] - Number of players
+	 * args[1] - Start sum for each player
+	 * args[2] - Server port
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) 
+	{
 		
 		int playersNumber = 0;
 		int money = 0;
@@ -64,11 +77,13 @@ public class Server {
 		try
 		{
 			playersNumber = Integer.parseInt(args[0]);
+			money = Integer.parseInt(args[1]);
+			serverPort = Integer.parseInt(args[2]);
+			
 		}
 		catch(NumberFormatException e)
 		{
-			System.out.println("");
-			
+			System.out.println("");	
 		}
 		
 		Server serv = new Server(playersNumber, money, serverPort);
