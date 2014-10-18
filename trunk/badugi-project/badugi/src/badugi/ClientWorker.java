@@ -35,11 +35,14 @@ public class ClientWorker implements Runnable
         	return;
         }
         
+        out.println("Connected!");
+        
         while(query != null) 
         {
             try 	
             {
-                query = in.readLine();
+                //query = in.readLine();
+                
                 
                 /*
             	 * Query analyzing
@@ -47,11 +50,11 @@ public class ClientWorker implements Runnable
             	 * */
             	
             }
-            catch (IOException e) 
+           /* catch (IOException e) 
             {
                 System.out.println("Read failed"); 
                 return;
-            } 
+            } */
             catch(NullPointerException e)
             {
                 System.out.println("Unexpected connection fail " 
