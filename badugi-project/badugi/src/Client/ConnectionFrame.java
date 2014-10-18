@@ -66,6 +66,16 @@ public class ConnectionFrame extends JFrame implements ActionListener, Runnable
 	{
 		output.setText(text);
 	}
+	public String getOutputText()
+	{
+		return output.getText();
+	}
+	
+	
+	public void blockConnectButton()
+	{
+		connectionButton.setEnabled(false);
+	}
 	/*
 	 * Refactor f to frame in the end
 	 * */

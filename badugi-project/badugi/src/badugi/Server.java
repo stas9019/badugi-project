@@ -8,7 +8,7 @@ import Client.Client;
 
 /*
  * Segregate Server and ClientWorker work
- * Server makes general changes, ClientWorker only players needs
+ * Game class makes general changes, ClientWorker only players needs
  * Make smth like in Wolf-Hare game, to allow players make decisions step-by-step
  * 
  */
@@ -16,23 +16,30 @@ public class Server
 {
 
 	private int port;
+	private int money;
+	private int playersNumber;
 	
-	
+	private int playersCounter = 0;
+	private boolean init;
 	private ServerSocket socket;
 	private ClientWorker workers[];  
 	private Game game;
+	private PrintWriter out;
 	
 	Server(int playersNumber, int money, int port)
 	{
 		
 		this.port = port;
+		this.money = money;
+		this.playersNumber = playersNumber;
 		
+		init = true;
 		game = new Game(playersNumber, money);
-		workers = new ClientWorker[playersNumber]; 	
+		workers = new ClientWorker[playersNumber+1]; 	
 
 	}
 	
-	public void listenSocket()
+	public void listenSocket() 
 	{
 		try 
 		{
@@ -45,20 +52,40 @@ public class Server
 		}
 		while(true)
 		{
-		    /*Add counter to mark clients*/    
-			ClientWorker worker;
-		            
-		    try
-		    {
-		    	worker = new ClientWorker(socket.accept(), game);
-		    	Thread t = new Thread(worker);
-		   	    t.start();
-		    } 
-		    catch (IOException e) 
-		    {
-		     	System.out.println("Acception failed");
-		        //System.exit(-1);
-		    }
+		    
+			System.out.println(playersCounter);
+			
+			if(playersCounter < playersNumber )
+			{
+			
+				try
+				{
+					playersCounter++;
+					workers[playersCounter] = new ClientWorker(socket.accept(), game);
+					Thread t = new Thread(workers[playersCounter]);
+					t.start();
+				   	    
+				} 
+				catch (IOException e) 
+				{
+					System.out.println("Acception failed");
+					//System.exit(-1);
+				}
+			}
+			else
+			{	
+				try
+				{	
+					out = new PrintWriter(socket.accept().getOutputStream(), true);
+					out.println("Sorry, game already started");
+				}
+				catch(IOException e) 
+				{
+					System.out.println("Acception failed");
+				}
+			}
+			
+		    
 		}
 	}
 	

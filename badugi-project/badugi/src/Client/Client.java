@@ -37,7 +37,7 @@ public class Client{
 		try
 		{
             listenSocket(adress, Integer.parseInt(port));
-            frame.setOutputText("Connected");
+            //frame.setOutputText("Connected");
 	    }
 	    catch(NullPointerException e)
 		{
@@ -49,7 +49,7 @@ public class Client{
 			frame.setOutputText("Wrong port: "+ port); //System.exit(1);
 			return;
 	    }
-		frame.setOutputText("No answer from server");		
+		//frame.setOutputText("No answer from server");		
 	}
 	
 	public void listenSocket(String adress, int port)
@@ -59,14 +59,16 @@ public class Client{
         	socket = new Socket(adress, port);
         	out = new PrintWriter(socket.getOutputStream(), true);
         	in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        	
+        	frame.setOutputText(in.readLine());
         }
         catch(NullPointerException e)
         {
         	frame.setOutputText("No connection");
         }
-        catch  (NumberFormatException e) 
+        catch(NumberFormatException e) 
         {
-        	frame.setOutputText("No I/O"); 
+        	frame.setOutputText("NumberFormatException"); 
         }
         catch (UnknownHostException e) 
         {
@@ -80,7 +82,9 @@ public class Client{
         {
         	frame.setOutputText("Wrong port: "+ port); 
         }
-	
+        
+        if(frame.getOutputText().equals("Connected!"))
+        	frame.blockConnectButton();
     }
 	
 	public void sendQueryToServer()
