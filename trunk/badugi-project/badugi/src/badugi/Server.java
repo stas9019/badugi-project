@@ -34,8 +34,8 @@ public class Server
 		this.playersNumber = playersNumber;
 		
 		init = true;
-		game = new Game(playersNumber, money);
-		workers = new ClientWorker[playersNumber+1]; 	
+		
+		workers = new ClientWorker[playersNumber+1]; //1 more, because server makes worker[0]	
 
 	}
 	
@@ -70,6 +70,11 @@ public class Server
 				{
 					System.out.println("Acception failed");
 					//System.exit(-1);
+				}
+				
+				if(playersCounter == playersNumber )
+				{
+					game = new Game(workers, money);
 				}
 			}
 			else

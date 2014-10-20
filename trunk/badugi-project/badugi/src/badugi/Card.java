@@ -6,7 +6,7 @@ public class Card
 	private int figure;
 	private boolean beenUsed;
 	
-	Card(int colour, int figure)
+	public Card(int colour, int figure)
 	{
 		this.color = colour;
 		this.figure = figure;
@@ -15,28 +15,28 @@ public class Card
 	
 	/*
 	 * set and get functions to card figure
-	 */
+	 
 	public void setCardFigure(int cardFigure)
 	{
 		this.figure = cardFigure;
+	}
+
+	/*
+	 * set and get functions to card color
+	 
+	public void setCardColor(int cardColor)
+	{
+		this.color = cardColor;
+	}*/
+
+	public int getCardColor()
+	{
+		return color;
 	}
 	
 	public int  getCardFigure()
 	{
 		return figure;
-	}
-	
-	/*
-	 * set and get functions to card color
-	 */
-	public void setCardColor(int cardColor)
-	{
-		this.color = cardColor;
-	}
-	
-	public int getCardColor()
-	{
-		return color;
 	}
 	
 	public void useCard()
