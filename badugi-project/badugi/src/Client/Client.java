@@ -17,19 +17,20 @@ import badugi.Card;
  */
 public class Client{
 
-	private Card playerSuit[] = new Card[4];
+	private Card suit[];
+	private Card playerHand[] = new Card[4];
 	private int playerMoney;
 	private boolean isDealer;
-	private ConnectionFrame frame;
+	private ConnectionFrame connectionFrame;
 	private Socket socket = null;
 	private PrintWriter out = null;
 	private BufferedReader in = null;
 	
 	Client()
 	{
-		frame = new ConnectionFrame(this); 
+		connectionFrame = new ConnectionFrame(this); 
 		
-		SwingUtilities.invokeLater(frame);
+		SwingUtilities.invokeLater(connectionFrame);
 	}
 	
 	void connectionAttempt(String adress, String port)
@@ -41,12 +42,12 @@ public class Client{
 	    }
 	    catch(NullPointerException e)
 		{
-	    	frame.setOutputText("Connection failed");
+	    	connectionFrame.setOutputText("Connection failed");
 	    	return;
 	    }	
 		catch  (NumberFormatException e) 
 		{
-			frame.setOutputText("Wrong port: "+ port); //System.exit(1);
+			connectionFrame.setOutputText("Wrong port: "+ port); //System.exit(1);
 			return;
 	    }
 		//frame.setOutputText("No answer from server");		
@@ -60,34 +61,42 @@ public class Client{
         	out = new PrintWriter(socket.getOutputStream(), true);
         	in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         	
-        	frame.setOutputText(in.readLine());
+        	connectionFrame.setOutputText(in.readLine());
         }
         catch(NullPointerException e)
         {
-        	frame.setOutputText("No connection");
+        	connectionFrame.setOutputText("No connection");
         }
         catch(NumberFormatException e) 
         {
-        	frame.setOutputText("NumberFormatException"); 
+        	connectionFrame.setOutputText("NumberFormatException"); 
         }
         catch (UnknownHostException e) 
         {
-        	frame.setOutputText("Unknown host: "+ adress); 
+        	connectionFrame.setOutputText("Unknown host: "+ adress); 
         }
         catch  (IOException e) 
         {
-        	frame.setOutputText("No I/O"); 
+        	connectionFrame.setOutputText("No I/O"); 
         }
         catch (IllegalArgumentException e) 
         {
-        	frame.setOutputText("Wrong port: "+ port); 
+        	connectionFrame.setOutputText("Wrong port: "+ port); 
         }
         
-        if(frame.getOutputText().equals("Connected!"))
-        	frame.blockConnectButton();
+        /*use frame's outputText only here, then in.readline().equals("SomeString")*/
+        if(connectionFrame.getOutputText().equals("Connected!"))
+        {
+        	connectionFrame.blockConnectButton();
+        	initSuit();
+        }
+        
+        /*server's answer analyze part
+         * maybe some special function for this*/
+        
     }
-	
-	public void sendQueryToServer()
+
+	public void sendQueryToServer(String query)
 	{
 		/*
 		 * Old example of communication, need to be changed
@@ -102,6 +111,22 @@ public class Client{
 		catch(NullPointerException e){
 		    //output.setText("No connection");
 		}*/
+	}
+	
+	/*initiate suit, after player joins game*/
+	public void initSuit()
+	{
+		suit = new Card[52];
+		
+		for(int i=1; i<=13; i++)
+		{
+			for(int j=1; j<=4; j++)
+			{
+				suit[i*j-1] = new Card(i,j);
+				//suit[i*j-1].setCardFigure(i);
+				//suit[i*j-1].setCardColor(j);
+			}
+		}
 	}
 	
 	public void setAsDealer()
