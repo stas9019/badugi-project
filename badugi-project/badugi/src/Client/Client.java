@@ -27,6 +27,7 @@ public class Client{
 	private Socket socket = null;
 	private PrintWriter out = null;
 	private BufferedReader in = null;
+	String text;
 	
 	Client()
 	{
@@ -64,7 +65,8 @@ public class Client{
         	out = new PrintWriter(socket.getOutputStream(), true);
         	in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         	
-        	connectionFrame.setOutputText(in.readLine());
+        	text = in.readLine();
+        	connectionFrame.setOutputText(text);
         }
         catch(NullPointerException e)
         {
@@ -88,20 +90,21 @@ public class Client{
         }
         
         /*use frame's outputText only here, then in.readline().equals("SomeString")*/
-        if(connectionFrame.getOutputText().equals("Connected!"))
+        if(text.equals("Connected!"))
         {
         	connectionFrame.blockConnectButton();
         	//initSuit();
         }
         
-        if(connectionFrame.getOutputText().equals("Game starts!"))
+        if(text.equals("Game starts!"))
         {
         	
         	connectionFrame.blockConnectButton();
         	connectionFrame.setVisible(false);
         	
-        	
+        	//sendQueryToServer("");
         	gameFrame = new GameFrame(this);
+        	
         	//gameFrame.setVisible(true);
         	SwingUtilities.invokeLater(gameFrame);
         	
@@ -117,6 +120,7 @@ public class Client{
 
 	public void sendQueryToServer(String query)
 	{
+		out.println(query);
 		/*
 		 * Old example of communication, need to be changed
 		 */

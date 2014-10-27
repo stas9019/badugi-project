@@ -46,30 +46,31 @@ public class ClientWorker implements Runnable
 		
         out.println("Connected!");    
         
-       /* while(query != null) 
+        while(query != null) 
         {
             try 	
             {
-               query = in.readLine();
+               
                System.out.println("CL worker" + query);
+               query = in.readLine();
                // out.println(query);
                 
             	 /* Query analyzing
             	 * 
-            	 *
+            	 */
             	
             }
             catch (IOException e) 
             {
                 System.out.println("Read failed"); 
                 return;
-            } 
+            }
             catch(NullPointerException e)
             {
                 System.out.println("Unexpected connection fail " 
                 					+socket.getLocalSocketAddress());
                 return;
             } 
-        }*/
+        }
 	}
 }
