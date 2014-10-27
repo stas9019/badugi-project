@@ -22,7 +22,7 @@ public class Server
 	private int playersCounter = 0;
 	private boolean init;
 	private ServerSocket socket;
-	private ClientWorker workers[];  
+	private ClientWorker players[];  
 	private Game game;
 	private PrintWriter out;
 	
@@ -35,7 +35,7 @@ public class Server
 		
 		init = true;
 		
-		workers = new ClientWorker[playersNumber+1]; //1 more, because server makes worker[0]	
+		players = new ClientWorker[playersNumber]; //1 more, because server makes worker[0]	
 
 	}
 	
@@ -53,16 +53,18 @@ public class Server
 		while(true)
 		{
 		    
-			System.out.println(playersCounter);
+			
 			
 			if(playersCounter < playersNumber )
 			{
 			
 				try
 				{
+					players[playersCounter] = new ClientWorker(socket.accept(), game);
+					System.out.println(playersCounter);
+					
+					Thread t = new Thread(players[playersCounter]);
 					playersCounter++;
-					workers[playersCounter] = new ClientWorker(socket.accept(), game);
-					Thread t = new Thread(workers[playersCounter]);
 					t.start();
 				   	    
 				} 
@@ -72,9 +74,10 @@ public class Server
 					//System.exit(-1);
 				}
 				
-				if(playersCounter == playersNumber )
+				if(playersCounter  == playersNumber )
 				{
-					game = new Game(workers, money);
+					System.out.println("Game starts, Server");
+					game = new Game(players, money);
 				}
 			}
 			else
@@ -89,8 +92,6 @@ public class Server
 					System.out.println("Acception failed");
 				}
 			}
-			
-		    
 		}
 	}
 	
