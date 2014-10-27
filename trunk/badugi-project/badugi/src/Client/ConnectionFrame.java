@@ -1,7 +1,7 @@
 package Client;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
-
 import java.io.BufferedReader;
 //import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -58,7 +58,20 @@ public class ConnectionFrame extends JFrame implements ActionListener, Runnable
 		String port  = portField.getText();
 		
 		if(event.getSource() == connectionButton)
-			client.connectionAttempt(adress, port);
+			try
+			{
+				client.connectionAttempt(adress, port);
+			} 
+			catch (InvocationTargetException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		
 	}
 	

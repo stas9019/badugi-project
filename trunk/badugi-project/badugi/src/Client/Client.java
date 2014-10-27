@@ -3,6 +3,7 @@ package Client;
 import javax.swing.SwingUtilities;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 
 import badugi.Card;
@@ -22,6 +23,7 @@ public class Client{
 	private int playerMoney;
 	private boolean isDealer;
 	private ConnectionFrame connectionFrame;
+	private GameFrame gameFrame;
 	private Socket socket = null;
 	private PrintWriter out = null;
 	private BufferedReader in = null;
@@ -31,9 +33,10 @@ public class Client{
 		connectionFrame = new ConnectionFrame(this); 
 		
 		SwingUtilities.invokeLater(connectionFrame);
+		
 	}
 	
-	void connectionAttempt(String adress, String port)
+	void connectionAttempt(String adress, String port) throws InvocationTargetException, InterruptedException
 	{
 		try
 		{
@@ -88,9 +91,25 @@ public class Client{
         if(connectionFrame.getOutputText().equals("Connected!"))
         {
         	connectionFrame.blockConnectButton();
-        	initSuit();
+        	//initSuit();
         }
         
+        if(connectionFrame.getOutputText().equals("Game starts!"))
+        {
+        	
+        	connectionFrame.blockConnectButton();
+        	connectionFrame.setVisible(false);
+        	
+        	
+        	gameFrame = new GameFrame(this);
+        	//gameFrame.setVisible(true);
+        	SwingUtilities.invokeLater(gameFrame);
+        	
+        	
+        	initSuit();
+        	
+        
+        }
         /*server's answer analyze part
          * maybe some special function for this*/
         

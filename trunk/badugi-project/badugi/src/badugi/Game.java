@@ -1,22 +1,25 @@
 package badugi;
 
+import java.io.BufferedReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.Random;
 
 public class Game
 {
 	private int round;
 	private int bank, money, port;
-	private ClientWorker workers[];
+	private ClientWorker players[];
 	private Card suit[];
 	public Random random = new Random();
 	
 	/*
 	 * initializing card suite
 	 */
-	Game(ClientWorker workers[], int money)
+	Game(ClientWorker players[], int money)
 	{
 		//this.playersNumber = playersNumber; // we have length of workers-1
-		this.workers = workers;
+		this.players = players;
 		this.money = money;
 		
 		suit = new Card[52];
@@ -30,11 +33,21 @@ public class Game
 				//suit[i*j-1].setCardColor(j);
 			}
 		}
+		
+		for(int i=0; i < players.length; i++)
+		{
+			System.out.println("player " + i);
+			players[i].sayToClient("Game starts!");
+			
+			
+		}
+		
+		
 	}
 	
 	Card takeNewCard()
 	{
-		Card randomCard = suit[random.nextInt(51)];
+		Card randomCard = suit[random.nextInt(52)];
 		return randomCard;
 	}
 	
