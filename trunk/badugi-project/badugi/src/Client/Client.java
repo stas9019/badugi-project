@@ -1,9 +1,8 @@
 package Client;
 
-import javax.swing.SwingUtilities;
+//import javax.swing.SwingUtilities;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 
 import badugi.Card;
@@ -24,24 +23,31 @@ public class Client{
 	private boolean isDealer;
 	private ConnectionFrame connectionFrame;
 	private GameFrame gameFrame;
-	private Socket socket = null;
-	private PrintWriter out = null;
-	private BufferedReader in = null;
+	private ClientWorker clientWorker;
+	
 	String text;
 	
 	Client()
 	{
 		connectionFrame = new ConnectionFrame(this); 
+		//gameFrame = new GameFrame(this);
 		
-		SwingUtilities.invokeLater(connectionFrame);
+		//gameFrame.setVisible(false);
+		//SwingUtilities.invokeLater(connectionFrame);
 		
 	}
 	
-	void connectionAttempt(String adress, String port) throws InvocationTargetException, InterruptedException
+	void connectionAttempt(String adress, String port)
 	{
 		try
 		{
-            listenSocket(adress, Integer.parseInt(port));
+			clientWorker = new ClientWorker(this, connectionFrame, adress, Integer.parseInt(port));
+			//clientWorker.listenSocket(adress, Integer.parseInt(port));
+			
+			Thread t = new Thread(clientWorker);
+			t.start();
+			
+			System.out.println("ARRRRRRRRRRRRRRR");
             //frame.setOutputText("Connected");
 	    }
 	    catch(NullPointerException e)
@@ -57,70 +63,19 @@ public class Client{
 		//frame.setOutputText("No answer from server");		
 	}
 	
-	public void listenSocket(String adress, int port)
+	void blockConnectionFrame()
 	{
-        try 
-        {
-        	socket = new Socket(adress, port);
-        	out = new PrintWriter(socket.getOutputStream(), true);
-        	in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        	
-        	text = in.readLine();
-        	connectionFrame.setOutputText(text);
-        }
-        catch(NullPointerException e)
-        {
-        	connectionFrame.setOutputText("No connection");
-        }
-        catch(NumberFormatException e) 
-        {
-        	connectionFrame.setOutputText("NumberFormatException"); 
-        }
-        catch (UnknownHostException e) 
-        {
-        	connectionFrame.setOutputText("Unknown host: "+ adress); 
-        }
-        catch  (IOException e) 
-        {
-        	connectionFrame.setOutputText("No I/O"); 
-        }
-        catch (IllegalArgumentException e) 
-        {
-        	connectionFrame.setOutputText("Wrong port: "+ port); 
-        }
-        
-        /*use frame's outputText only here, then in.readline().equals("SomeString")*/
-        if(text.equals("Connected!"))
-        {
-        	connectionFrame.blockConnectButton();
-        	//initSuit();
-        }
-        
-        if(text.equals("Game starts!"))
-        {
-        	
-        	connectionFrame.blockConnectButton();
-        	connectionFrame.setVisible(false);
-        	
-        	//sendQueryToServer("");
-        	gameFrame = new GameFrame(this);
-        	
-        	//gameFrame.setVisible(true);
-        	SwingUtilities.invokeLater(gameFrame);
-        	
-        	
-        	initSuit();
-        	
-        
-        }
-        /*server's answer analyze part
-         * maybe some special function for this*/
-        
-    }
+		connectionFrame.blockConnectButton();
+	}
+	
+	void invokeGameFrame()
+	{
+		gameFrame = new GameFrame(this);
+	}
 
 	public void sendQueryToServer(String query)
 	{
-		out.println(query);
+		//out.println(query);
 		/*
 		 * Old example of communication, need to be changed
 		 */
