@@ -1,26 +1,30 @@
 package badugi;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.Random;
 
 public class Game
 {
 	private int round;
 	private int bank, money, port;
-	private ClientWorker players[];
+	private Socket players[];
+	private PrintWriter out[];
 	private Card suit[];
 	public Random random = new Random();
 	
 	/*
 	 * initializing card suite
 	 */
-	Game(ClientWorker players[], int money)
+	Game(Socket players[], PrintWriter out[], int money)
 	{
 		//this.playersNumber = playersNumber; // we have length of workers-1
 		this.players = players;
 		this.money = money;
+		this.out = out;
 		
 		suit = new Card[52];
 		
@@ -36,8 +40,11 @@ public class Game
 		
 		for(int i=0; i < players.length; i++)
 		{
+			
+			out[i].println("Game starts!");
+			
 			System.out.println("player " + i);
-			players[i].sayToClient("Game starts!");
+			//players[i].sayToClient("Game starts!");
 			
 			
 		}

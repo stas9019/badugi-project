@@ -4,8 +4,6 @@ package badugi;
 import java.io.*;
 import java.net.*;
 
-import Client.Client;
-
 /*
  * Segregate Server and ClientWorker work
  * Game class makes general changes, ClientWorker only players needs
@@ -20,11 +18,11 @@ public class Server
 	private int playersNumber;
 	
 	private int playersCounter = 0;
-	private boolean init;
+	//private boolean init;
 	private ServerSocket socket;
-	private ClientWorker players[];  
+	private Socket players[];  
 	private Game game;
-	private PrintWriter out;
+	private PrintWriter out[];
 	
 	Server(int playersNumber, int money, int port)
 	{
@@ -33,14 +31,6 @@ public class Server
 		this.money = money;
 		this.playersNumber = playersNumber;
 		
-		init = true;
-		
-		players = new ClientWorker[playersNumber]; //1 more, because server makes worker[0]	
-
-	}
-	
-	public void listenSocket() 
-	{
 		try 
 		{
 	    	socket = new ServerSocket(port); 
@@ -50,23 +40,48 @@ public class Server
 			System.out.println("Could not listen on port " + port); 
 			//System.exit(-1);
 		}
+		
+		//init = true;
+		
+		players = new Socket[playersNumber]; //1 more, because server makes worker[0]
+		out = new PrintWriter[playersNumber];
+
+	}
+	
+	public void listenSocket() 
+	{
 		while(true)
 		{
-		    
-			
-			
 			if(playersCounter < playersNumber )
 			{
 			
 				try
 				{
-					players[playersCounter] = new ClientWorker(socket.accept(), game);
+					
+					players[playersCounter] = socket.accept();
+					
+					
+					//PrintWriter out = null;
+					try
+					{
+						out[playersCounter] = new PrintWriter(players[playersCounter].getOutputStream(), true);
+						
+					} catch (IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						System.out.println("IO exception");
+					}
+					out[playersCounter].println("Connected!");
+					
+					
+					
 					System.out.println(playersCounter);
 					
-					Thread t = new Thread(players[playersCounter]);
+					//Thread t = new Thread(players[playersCounter]);
 					playersCounter++;
-					t.start();
-				   	    
+					//t.start();
+					 
 				} 
 				catch (IOException e) 
 				{
@@ -76,14 +91,18 @@ public class Server
 				
 				if(playersCounter  == playersNumber )
 				{
-					System.out.println("Game starts, Server");
-					game = new Game(players, money);
+					game = new Game(players, out, money);
+					if(game != null)
+						System.out.println("Game starts, Server");
+					
+					
 				}
 			}
 			else
 			{	
 				try
 				{	
+					PrintWriter out;
 					out = new PrintWriter(socket.accept().getOutputStream(), true);
 					out.println("Sorry, game already started");
 				}

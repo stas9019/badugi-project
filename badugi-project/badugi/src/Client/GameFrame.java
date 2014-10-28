@@ -13,7 +13,7 @@ import javax.swing.JTextField;
 
 import badugi.Card;
 
-public class GameFrame extends JFrame implements ActionListener, Runnable
+public class GameFrame extends JFrame implements ActionListener//, Runnable
 {
 	
 	private JLabel gameStatus, moneyLeft, dealer;
@@ -41,13 +41,56 @@ public class GameFrame extends JFrame implements ActionListener, Runnable
 		 
 		  for(int i = 0; i < 4 ;i++)
 		    	 cards[i] = new JLabel();
+		  
+		  setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE); // to avoid ghost processes in memory
+			 setLayout(new GridBagLayout());
+			 GridBagConstraints c = new GridBagConstraints();
+			 
+			 
+			 /*make order for elements of frame*/
+			 c.fill = GridBagConstraints.HORIZONTAL;
+			 c.weightx = 1;
+		     c.gridx = 0;
+		     c.gridy = 0;
+		     c.gridwidth = 1;
+			 add(dealer,c);
+			 
+			 
+			 
+			 c.weightx = 1;
+		     c.gridx = 0;
+		     c.gridy = 1;
+		     c.gridwidth = 1;
+			 add(moneyLeft,c);
+			 
+		    
+		     //betButton, callButton, raiseButton, allInButton, checkButton, foldButton
+		     add(betButton);
+		     
+		     add(callButton);
+		     add(raiseButton);
+		     add(allInButton);
+		     add(checkButton);
+		     add(foldButton);
+		     add(sumField);
+		     
+		     for(int i = 0; i < 4 ;i++)
+		    	 add(cards[i]);
+		     
+		     add(gameStatus);
+		    
+			 
+		     pack();
+			 setVisible(true);
+
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO cases for all kind off actions performed
 		
 	}
-	@Override
+	
+	/*
 	public void run()
 	{
 		GameFrame f = new GameFrame(client);
@@ -57,7 +100,7 @@ public class GameFrame extends JFrame implements ActionListener, Runnable
 		 GridBagConstraints c = new GridBagConstraints();
 		 
 		 
-		 /*make order for elements of frame*/
+		 /*make order for elements of frame
 		 c.fill = GridBagConstraints.HORIZONTAL;
 		 c.weightx = 1;
 	     c.gridx = 0;
@@ -94,6 +137,6 @@ public class GameFrame extends JFrame implements ActionListener, Runnable
 		 f.setVisible(true);
 	
 		
-	}
+	}*/
 
 }

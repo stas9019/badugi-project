@@ -26,7 +26,7 @@ import javax.swing.JTextField;
  * 
  */
 
-public class ConnectionFrame extends JFrame implements ActionListener, Runnable
+public class ConnectionFrame extends JFrame implements ActionListener//, Runnable
 {
 	private JLabel output;
 	private JButton connectionButton;
@@ -39,6 +39,8 @@ public class ConnectionFrame extends JFrame implements ActionListener, Runnable
 	ConnectionFrame(Client client)
 	{
 		//setFont(new Font(Font.SANS_SERIF,Font.PLAIN,40));
+		 super();
+		 
 		 this.client = client;
 		 adressField = new JTextField(20);
 	     portField = new JTextField(20);
@@ -47,6 +49,25 @@ public class ConnectionFrame extends JFrame implements ActionListener, Runnable
 	     connectionButton.addActionListener(this);
 	     
 	     output = new JLabel();
+	     
+	     
+	     setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE); // to avoid ghost processes in memory
+		 setLayout(new GridLayout(6,1));
+		 
+		 add(new JLabel("Server adress"));
+		 add(adressField);
+		 
+		 add(new JLabel("Port"));
+	     add(portField);
+	     
+	     add(connectionButton);
+	     
+	     add(output);
+	    
+		 
+	     pack();
+		 setVisible(true);
+	     
 	}
 	
 	@Override
@@ -58,19 +79,8 @@ public class ConnectionFrame extends JFrame implements ActionListener, Runnable
 		String port  = portField.getText();
 		
 		if(event.getSource() == connectionButton)
-			try
-			{
-				client.connectionAttempt(adress, port);
-			} 
-			catch (InvocationTargetException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InterruptedException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			client.connectionAttempt(adress, port);
+			
 			
 		
 	}
@@ -92,7 +102,7 @@ public class ConnectionFrame extends JFrame implements ActionListener, Runnable
 	/*
 	 * Refactor f to frame in the end
 	 * */
-	public void run() 
+	/*public void run() 
 	{
 
 		 ConnectionFrame f = new ConnectionFrame(client);
@@ -114,6 +124,6 @@ public class ConnectionFrame extends JFrame implements ActionListener, Runnable
 	     f.pack();
 		 f.setVisible(true);
 	
-	}
+	}*/
 
 }
