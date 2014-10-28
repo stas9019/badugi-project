@@ -1,11 +1,8 @@
 package Client;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.io.BufferedReader;
-//import java.io.InputStreamReader;
 import java.io.PrintWriter;
-//import java.io.IOException;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -21,9 +18,8 @@ import javax.swing.JTextField;
  * This is client's View Layer 
  * 
  * TO DO 
- * Client's GUI: First Frame - connection frame, Second - Game Frame
- * Establishing connection by IP and port
- * 
+ * Make constant size
+ * Set position in center of display
  */
 
 public class ConnectionFrame extends JFrame implements ActionListener//, Runnable
@@ -31,14 +27,11 @@ public class ConnectionFrame extends JFrame implements ActionListener//, Runnabl
 	private JLabel output;
 	private JButton connectionButton;
     private JTextField adressField, portField;
-    private Socket socket = null;
-    private PrintWriter out = null;
-    private BufferedReader in = null;
-	private Client client;
+	
+    private Client client;
     
 	ConnectionFrame(Client client)
 	{
-		//setFont(new Font(Font.SANS_SERIF,Font.PLAIN,40));
 		 super();
 		 
 		 this.client = client;
@@ -63,11 +56,8 @@ public class ConnectionFrame extends JFrame implements ActionListener//, Runnabl
 	     add(connectionButton);
 	     
 	     add(output);
-	    
-		 
-	     pack();
-		 setVisible(true);
 	     
+	     pack();  
 	}
 	
 	@Override
@@ -80,50 +70,20 @@ public class ConnectionFrame extends JFrame implements ActionListener//, Runnabl
 		
 		if(event.getSource() == connectionButton)
 			client.connectionAttempt(adress, port);
-			
-			
-		
 	}
 	
 	public void setOutputText(String text)
 	{
 		output.setText(text);
 	}
+	
 	public String getOutputText()
 	{
 		return output.getText();
 	}
-	
-	
+		
 	public void blockConnectButton()
 	{
 		connectionButton.setEnabled(false);
 	}
-	/*
-	 * Refactor f to frame in the end
-	 * */
-	/*public void run() 
-	{
-
-		 ConnectionFrame f = new ConnectionFrame(client);
-		 
-		 f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE); // to avoid ghost processes in memory
-		 f.setLayout(new GridLayout(6,1));
-		 
-		 f.add(new JLabel("Server adress"));
-		 f.add(adressField);
-		 
-		 f.add(new JLabel("Port"));
-	     f.add(portField);
-	     
-	     f.add(connectionButton);
-	     
-	     f.add(output);
-	    
-		 
-	     f.pack();
-		 f.setVisible(true);
-	
-	}*/
-
 }

@@ -22,7 +22,11 @@ public class GameFrame extends JFrame implements ActionListener//, Runnable
 	private JButton betButton, callButton, raiseButton, allInButton, checkButton, foldButton;
 	private JTextField sumField;
 	
-	
+	/*
+	 * TO-DO
+	 * Size
+	 * Position
+	 * */
 	GameFrame(Client client)
 	{
 		 this.client = client;
@@ -39,104 +43,53 @@ public class GameFrame extends JFrame implements ActionListener//, Runnable
 		 moneyLeft = new JLabel();
 		 dealer = new JLabel();
 		 
-		  for(int i = 0; i < 4 ;i++)
-		    	 cards[i] = new JLabel();
+		 for(int i = 0; i < 4 ;i++)
+			 cards[i] = new JLabel();
 		  
-		  setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE); // to avoid ghost processes in memory
-			 setLayout(new GridBagLayout());
-			 GridBagConstraints c = new GridBagConstraints();
+		 setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE); // to avoid ghost processes in memory
+		 setLayout(new GridBagLayout());
+		 GridBagConstraints c = new GridBagConstraints();
 			 
 			 
 			 /*make order for elements of frame*/
-			 c.fill = GridBagConstraints.HORIZONTAL;
-			 c.weightx = 1;
-		     c.gridx = 0;
-		     c.gridy = 0;
-		     c.gridwidth = 1;
-			 add(dealer,c);
+		 c.fill = GridBagConstraints.HORIZONTAL;
+		 c.weightx = 1;
+		 c.gridx = 0;
+		 c.gridy = 0;
+		 c.gridwidth = 1;
+		 add(dealer,c);
 			 
 			 
 			 
-			 c.weightx = 1;
-		     c.gridx = 0;
-		     c.gridy = 1;
-		     c.gridwidth = 1;
-			 add(moneyLeft,c);
+		 c.weightx = 1;
+		 c.gridx = 0;
+		 c.gridy = 1;
+		 c.gridwidth = 1;
+		 add(moneyLeft,c);
 			 
-		    
-		     //betButton, callButton, raiseButton, allInButton, checkButton, foldButton
-		     add(betButton);
+		 add(betButton);  
+		 add(callButton);
+		 add(raiseButton);
+		 add(allInButton);
+		 add(checkButton);
+		 add(foldButton);
+		 add(sumField);
 		     
-		     add(callButton);
-		     add(raiseButton);
-		     add(allInButton);
-		     add(checkButton);
-		     add(foldButton);
-		     add(sumField);
+		 for(int i = 0; i < 4 ;i++)
+			 add(cards[i]);
 		     
-		     for(int i = 0; i < 4 ;i++)
-		    	 add(cards[i]);
-		     
-		     add(gameStatus);
+		 add(gameStatus);
 		    
 			 
-		     pack();
-			 setVisible(true);
+		 pack();
+		 setVisible(true);
 
 	}
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO cases for all kind off actions performed
-		
-	}
-	
-	/*
-	public void run()
+	public void actionPerformed(ActionEvent event) 
 	{
-		GameFrame f = new GameFrame(client);
-		 
-		 f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE); // to avoid ghost processes in memory
-		 f.setLayout(new GridBagLayout());
-		 GridBagConstraints c = new GridBagConstraints();
-		 
-		 
-		 /*make order for elements of frame
-		 c.fill = GridBagConstraints.HORIZONTAL;
-		 c.weightx = 1;
-	     c.gridx = 0;
-	     c.gridy = 0;
-	     c.gridwidth = 1;
-		 f.add(dealer,c);
-		 
-		 
-		 
-		 c.weightx = 1;
-	     c.gridx = 0;
-	     c.gridy = 1;
-	     c.gridwidth = 1;
-		 f.add(moneyLeft,c);
-		 
-	    
-	     //betButton, callButton, raiseButton, allInButton, checkButton, foldButton
-	     f.add(betButton);
-	     
-	     f.add(callButton);
-	     f.add(raiseButton);
-	     f.add(allInButton);
-	     f.add(checkButton);
-	     f.add(foldButton);
-	     f.add(sumField);
-	     
-	     for(int i = 0; i < 4 ;i++)
-	    	 f.add(cards[i]);
-	     
-	     f.add(gameStatus);
-	    
-		 
-	     f.pack();
-		 f.setVisible(true);
-	
-		
-	}*/
-
+		/* TODO cases for all kind off actions performed
+		 * if(event.getSource() == ...) for all buttons
+		 */
+	}
 }
