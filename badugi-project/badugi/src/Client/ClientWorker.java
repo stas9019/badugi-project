@@ -9,6 +9,11 @@ import java.net.UnknownHostException;
 
 import badugi.Game;
 
+/*TO-DO
+ * Finalize method
+ * */
+
+
 public class ClientWorker implements Runnable
 {
 	
@@ -45,7 +50,7 @@ public class ClientWorker implements Runnable
 	        	out = new PrintWriter(socket.getOutputStream(), true);
 	        	in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	          
-	        	System.out.println("Connected on " + socket.getPort());
+	        	//System.out.println("Connected on " + socket.getPort());
 	        }
 	        catch(NullPointerException e)
 	        {
@@ -75,10 +80,7 @@ public class ClientWorker implements Runnable
 	        	
 		        try
 				{
-		        	System.out.println("Client text " + text);
-					text = in.readLine();
-					
-		        	//connectionFrame.setOutputText(text);
+					text = in.readLine();					
 				} 
 	        	
 	        	catch (IOException e)
@@ -86,43 +88,23 @@ public class ClientWorker implements Runnable
 	        		connectionFrame.setOutputText("No I/O"); 
 				}
 		        
-		        /*use frame's outputText only here, then in.readline().equals("SomeString")*/
+		        /*server's answer analyze part
+		         * maybe some special function for this*/
+		        
 		        if(text.equals("Connected!"))
 		        {
-		        	client.blockConnectionFrame();
-		        	
-		        	//sendQueryToServer(" asdfghjkl;");
-		        	//text = "";
-		        	//initSuit();
+		        	connectionFrame.blockConnectButton();
+		        	connectionFrame.setOutputText("Connected!");		        	
 		        }
 		        
 		        if(text.equals("Game starts!"))
 		        {
 		        	System.out.println("Client game");
+		        	connectionFrame.setVisible(false);
+		        	
 		        	client.invokeGameFrame();
-		        	//text = "";
-		        	
-		        	//connectionFrame.blockConnectButton();
-		        	//connectionFrame.setVisible(false);
-		        	
-		        	
-		        	//gameFrame.setVisible(true);
-		        	//sendQueryToServer(" 12345678");
-		        	
-		        	
-		        	//gameFrame.setVisible(true);
-		        	//SwingUtilities.invokeLater(gameFrame);
-		        	
-		        	
-		        	//client.initSuit();
-		        	
-		        
+		        	client.initSuit();	        	
 		        }
-		        
-		        
-		        
-		        /*server's answer analyze part
-		         * maybe some special function for this*/
 			}      
     }
 

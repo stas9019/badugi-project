@@ -1,9 +1,8 @@
 package Client;
 
-//import javax.swing.SwingUtilities;
 
 import java.io.*;
-import java.net.*;
+
 
 import badugi.Card;
 
@@ -29,12 +28,7 @@ public class Client{
 	
 	Client()
 	{
-		connectionFrame = new ConnectionFrame(this); 
-		//gameFrame = new GameFrame(this);
-		
-		//gameFrame.setVisible(false);
-		//SwingUtilities.invokeLater(connectionFrame);
-		
+		connectionFrame = new ConnectionFrame(this); 	
 	}
 	
 	void connectionAttempt(String adress, String port)
@@ -42,13 +36,10 @@ public class Client{
 		try
 		{
 			clientWorker = new ClientWorker(this, connectionFrame, adress, Integer.parseInt(port));
-			//clientWorker.listenSocket(adress, Integer.parseInt(port));
 			
 			Thread t = new Thread(clientWorker);
 			t.start();
 			
-			System.out.println("ARRRRRRRRRRRRRRR");
-            //frame.setOutputText("Connected");
 	    }
 	    catch(NullPointerException e)
 		{
@@ -63,32 +54,19 @@ public class Client{
 		//frame.setOutputText("No answer from server");		
 	}
 	
-	void blockConnectionFrame()
-	{
-		connectionFrame.blockConnectButton();
-	}
 	
 	void invokeGameFrame()
 	{
 		gameFrame = new GameFrame(this);
 	}
 
+	/*TO-DO
+	 * Function to communicate with server
+	 * Separate class isn't necessary, I think
+	 * 	*/
 	public void sendQueryToServer(String query)
 	{
 		//out.println(query);
-		/*
-		 * Old example of communication, need to be changed
-		 */
-		/*try {
-		    out.println(input.getText());	//sending query to server
-		    output.setText(in.readLine());	//send answer to output
-		}
-		catch (IOException e) {
-		    System.out.println("Read failed"); System.exit(1);
-		}
-		catch(NullPointerException e){
-		    //output.setText("No connection");
-		}*/
 	}
 	
 	/*initiate suit, after player joins game*/
@@ -101,8 +79,6 @@ public class Client{
 			for(int j=1; j<=4; j++)
 			{
 				suit[i*j-1] = new Card(i,j);
-				//suit[i*j-1].setCardFigure(i);
-				//suit[i*j-1].setCardColor(j);
 			}
 		}
 	}
@@ -112,16 +88,15 @@ public class Client{
 		isDealer = true;
 	}
 	
+	public ConnectionFrame getConnectionFrame()
+	{
+		return connectionFrame;
+	}
 	
 	
 	public static void main(String[] args) 
 	{
 		Client client = new Client();
 	}
-
 	
-	
-
-	
-
 }

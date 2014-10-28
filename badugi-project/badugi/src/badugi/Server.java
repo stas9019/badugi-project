@@ -7,9 +7,12 @@ import java.net.*;
 /*
  * Segregate Server and ClientWorker work
  * Game class makes general changes, ClientWorker only players needs
- * Make smth like in Wolf-Hare game, to allow players make decisions step-by-step
+ * Make something like in Wolf-Hare game, to allow players make decisions step-by-step
  * 
  */
+/*TO-DO
+ * Finalize method
+ * */
 public class Server 
 {
 
@@ -18,11 +21,9 @@ public class Server
 	private int playersNumber;
 	
 	private int playersCounter = 0;
-	//private boolean init;
 	private ServerSocket socket;
 	private Socket players[];  
 	private Game game;
-	private PrintWriter out[];
 	
 	Server(int playersNumber, int money, int port)
 	{
@@ -38,13 +39,10 @@ public class Server
 		catch (IOException e) 
 		{
 			System.out.println("Could not listen on port " + port); 
-			//System.exit(-1);
+			System.exit(-1);
 		}
 		
-		//init = true;
-		
-		players = new Socket[playersNumber]; //1 more, because server makes worker[0]
-		out = new PrintWriter[playersNumber];
+		players = new Socket[playersNumber]; 
 
 	}
 	
@@ -60,42 +58,33 @@ public class Server
 					
 					players[playersCounter] = socket.accept();
 					
-					
-					//PrintWriter out = null;
+					PrintWriter out = null;
 					try
 					{
-						out[playersCounter] = new PrintWriter(players[playersCounter].getOutputStream(), true);
+						out = new PrintWriter(players[playersCounter].getOutputStream(), true);
 						
-					} catch (IOException e)
+					}
+					catch (IOException e)
 					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 						System.out.println("IO exception");
 					}
-					out[playersCounter].println("Connected!");
 					
+					out.println("Connected!");
 					
-					
-					System.out.println(playersCounter);
-					
-					//Thread t = new Thread(players[playersCounter]);
 					playersCounter++;
-					//t.start();
 					 
 				} 
 				catch (IOException e) 
 				{
 					System.out.println("Acception failed");
-					//System.exit(-1);
 				}
 				
 				if(playersCounter  == playersNumber )
 				{
-					game = new Game(players, out, money);
+					game = new Game(players, money);
+					
 					if(game != null)
 						System.out.println("Game starts, Server");
-					
-					
 				}
 			}
 			else
@@ -126,6 +115,9 @@ public class Server
 		int money = 0;
 		int serverPort = 0;
 		
+		/*TO-DO
+		 * Check parameters
+		 * */
 		try
 		{
 			playersNumber = Integer.parseInt(args[0]);
@@ -135,11 +127,12 @@ public class Server
 		}
 		catch(NumberFormatException e)
 		{
-			System.out.println("");	
+			System.out.println("Wrong parametrs");	
+			return;
 		}
 		
-		Server serv = new Server(playersNumber, money, serverPort);
-		serv.listenSocket();
+		Server server = new Server(playersNumber, money, serverPort);
+		server.listenSocket();
 
 	}
 

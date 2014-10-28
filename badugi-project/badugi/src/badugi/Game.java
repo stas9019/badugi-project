@@ -12,19 +12,17 @@ public class Game
 	private int round;
 	private int bank, money, port;
 	private Socket players[];
-	private PrintWriter out[];
 	private Card suit[];
 	public Random random = new Random();
 	
 	/*
-	 * initializing card suite
+	 * Initializing card suite
 	 */
-	Game(Socket players[], PrintWriter out[], int money)
+	Game(Socket players[], int money)
 	{
-		//this.playersNumber = playersNumber; // we have length of workers-1
+		
 		this.players = players;
 		this.money = money;
-		this.out = out;
 		
 		suit = new Card[52];
 		
@@ -33,23 +31,24 @@ public class Game
 			for(int j=1; j<=4; j++)
 			{
 				suit[i*j-1] = new Card(i,j);
-				//suit[i*j-1].setCardFigure(i);
-				//suit[i*j-1].setCardColor(j);
 			}
 		}
 		
 		for(int i=0; i < players.length; i++)
 		{
-			
-			out[i].println("Game starts!");
-			
-			System.out.println("player " + i);
-			//players[i].sayToClient("Game starts!");
-			
+			PrintWriter out = null;
+			try
+			{
+				out = new PrintWriter(players[i].getOutputStream(), true);
+			} 
+			catch (IOException e)
+			{
+				System.out.println("I/O Exception");
+			}
+						
+			out.println("Game starts!");		
 			
 		}
-		
-		
 	}
 	
 	Card takeNewCard()
