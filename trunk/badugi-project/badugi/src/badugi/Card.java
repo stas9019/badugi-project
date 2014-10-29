@@ -23,11 +23,16 @@ public class Card
 
 	/*
 	 * set and get functions to card color
+	 */
 	 
 	public void setCardColor(int cardColor)
 	{
 		this.color = cardColor;
-	}*/
+	}
+	public void setCardFigure(int cardFigure)
+	{
+		this.figure = figure;
+	}
 
 	public int getCardColor()
 	{

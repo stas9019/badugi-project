@@ -48,21 +48,28 @@ public class Game
 			}
 						
 			out.println("Game starts!");		
-			
-			
 		}
 		
-		for(int i=0; i < players.length; i++)
+		firstCardDistribution();
+		
+		/*for(int i=0; i < players.length; i++)
 		{
-			listenForPlayer(players[i]);
-		}
-		
+			try
+			{
+				listenForPlayer(players[i]);
+			}
+			catch(NullPointerException e)
+			{}
+		}*/
 	}
 	
-	Card takeNewCard()
+	String takeNewCard()
 	{
 		Card randomCard = suit[random.nextInt(52)];
-		return randomCard;
+		String cardDescription = new String(String.valueOf(randomCard.getCardColor())+ " " + randomCard.getCardFigure());
+		System.out.println(cardDescription);
+		
+		return cardDescription;
 	}
 	
 	void nullBank()
@@ -75,12 +82,33 @@ public class Game
 		round++;
 	}
 	
+	void firstCardDistribution()
+	{
+		for(int i=0; i < players.length; i++)
+		{
+			PrintWriter out = null;
+			try
+			{
+				out = new PrintWriter(players[i].getOutputStream(), true);
+			} 
+			catch (IOException e)
+			{
+				System.out.println("I/O Exception");
+			}
+						
+			out.println("First card distribution");	
+			listenForPlayer(players[i]);
+		}
+	}
+	
 	void listenForPlayer(Socket player)
 	{
 		BufferedReader in = null;
+		PrintWriter out = null;
 		try
 		{
 			in = new BufferedReader(new InputStreamReader(player.getInputStream()));
+			out = new PrintWriter(player.getOutputStream(), true);
 		} 
 		catch (IOException e)
 		{
@@ -102,14 +130,27 @@ public class Game
 				System.out.println("No I/O while listening"); 
 			}
 			
-			if(text.equals("ready"))
+			/*if(text.equals("ready"))
 			{
 				System.out.println("Player ready"); 
+			}*/
+			if(text.equals("Take cards"))
+			{
+				startCardsDistribution(out);
+				out.close();
+				return;
 			}
 			
+			
 		}
-		
-		System.out.println("[esssdfsdfsdq");
 	}
-	
+	/*Maybe can be with parameter int for changing cards also*/
+	void startCardsDistribution(PrintWriter out)
+	{
+		for(int i=0; i < 4; i++)
+		{
+			String cardDescription = takeNewCard();
+			out.println("New card "+cardDescription);
+		}
+	}
 }

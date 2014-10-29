@@ -48,7 +48,7 @@ public class GameFrame extends JFrame implements ActionListener//, Runnable
 		 foldButton.addActionListener(this);
 		 
 		 for(int i = 0; i < 4 ;i++)
-			 cards[i] = new JLabel();
+			 cards[i] = new JLabel("Card" +i);
 		  
 		 setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE); // to avoid ghost processes in memory
 		 setLayout(new GridBagLayout());
@@ -65,7 +65,7 @@ public class GameFrame extends JFrame implements ActionListener//, Runnable
 			 
 			 
 			 
-		 c.weightx = 1;
+		 c.weightx = 2;
 		 c.gridx = 0;
 		 c.gridy = 1;
 		 c.gridwidth = 1;
@@ -80,7 +80,9 @@ public class GameFrame extends JFrame implements ActionListener//, Runnable
 		 add(sumField);
 		     
 		 for(int i = 0; i < 4 ;i++)
+		 {
 			 add(cards[i]);
+		 }
 		     
 		 add(gameStatus);
 		    
