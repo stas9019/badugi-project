@@ -57,7 +57,8 @@ public class ConnectionFrame extends JFrame implements ActionListener//, Runnabl
 	     
 	     add(output);
 	     
-	     pack();  
+	     pack(); 
+	     setVisible(true);
 	}
 	
 	@Override
