@@ -2,7 +2,6 @@ package Client;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -10,8 +9,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-
-import badugi.Card;
 
 public class GameFrame extends JFrame implements ActionListener//, Runnable
 {
@@ -42,6 +39,13 @@ public class GameFrame extends JFrame implements ActionListener//, Runnable
 		 gameStatus = new JLabel();
 		 moneyLeft = new JLabel();
 		 dealer = new JLabel();
+		 
+		 betButton.addActionListener(this);
+		 callButton.addActionListener(this);
+		 raiseButton.addActionListener(this);
+		 allInButton.addActionListener(this);
+		 checkButton.addActionListener(this);
+		 foldButton.addActionListener(this);
 		 
 		 for(int i = 0; i < 4 ;i++)
 			 cards[i] = new JLabel();
@@ -91,5 +95,15 @@ public class GameFrame extends JFrame implements ActionListener//, Runnable
 		/* TODO cases for all kind off actions performed
 		 * if(event.getSource() == ...) for all buttons
 		 */
+		
+		if(event.getSource() == callButton)
+		{
+			client.sendQueryToServer("ready");
+		}
+	}
+	
+	public void setStatusText(String text)
+	{
+		gameStatus.setText(text);
 	}
 }

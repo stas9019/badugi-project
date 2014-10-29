@@ -2,6 +2,7 @@ package Client;
 
 
 import java.io.*;
+import java.net.Socket;
 
 
 import badugi.Card;
@@ -16,6 +17,7 @@ import badugi.Card;
  */
 public class Client{
 
+	private Socket socket = null;
 	private Card suit[];
 	private Card playerHand[] = new Card[4];
 	private int playerMoney;
@@ -23,24 +25,40 @@ public class Client{
 	private ConnectionFrame connectionFrame;
 	private GameFrame gameFrame;
 	private ClientWorker clientWorker;
-	
+	PrintWriter out = null;
 	String text;
 	
 	Client()
 	{
-		connectionFrame = new ConnectionFrame(this); 	
+		connectionFrame = new ConnectionFrame(this); 
 	}
 	
 	void connectionAttempt(String adress, String port)
 	{
 		try
 		{
-			clientWorker = new ClientWorker(this, connectionFrame, adress, Integer.parseInt(port));
+			
+			socket = new Socket(adress, Integer.parseInt(port));
+			
+			try
+			{
+				out = new PrintWriter(socket.getOutputStream(), true);
+			} 
+			catch (IOException e)
+			{
+				gameFrame.setStatusText("No I/O");
+			}
+			
+			clientWorker = new ClientWorker(this, socket);
+			
 			
 			Thread t = new Thread(clientWorker);
 			t.start();
 			
 	    }
+		catch (IOException e)
+		{
+		}
 	    catch(NullPointerException e)
 		{
 	    	connectionFrame.setOutputText("Connection failed");
@@ -66,7 +84,8 @@ public class Client{
 	 * 	*/
 	public void sendQueryToServer(String query)
 	{
-		//out.println(query);
+		
+		out.println(query);
 	}
 	
 	/*initiate suit, after player joins game*/
@@ -92,6 +111,7 @@ public class Client{
 	{
 		return connectionFrame;
 	}
+	
 	
 	
 	public static void main(String[] args) 

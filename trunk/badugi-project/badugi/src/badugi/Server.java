@@ -72,6 +72,7 @@ public class Server
 					out.println("Connected!");
 					
 					playersCounter++;
+					System.out.println(playersCounter);
 					 
 				} 
 				catch (IOException e) 
@@ -81,10 +82,8 @@ public class Server
 				
 				if(playersCounter  == playersNumber )
 				{
+					System.out.println("Game starts, Server");
 					game = new Game(players, money);
-					
-					if(game != null)
-						System.out.println("Game starts, Server");
 				}
 			}
 			else

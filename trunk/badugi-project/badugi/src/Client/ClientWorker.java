@@ -22,15 +22,15 @@ public class ClientWorker implements Runnable
 	private BufferedReader in = null;
     private Client client;
     private ConnectionFrame connectionFrame;
-    String adress;
-    int port;
+    private String adress;
+    private int port;
     
-	ClientWorker(Client client, ConnectionFrame connectionFrame, String adress, int port ) //was Server server
+	ClientWorker(Client client, Socket socket) //was Server server
 	{
+		this.socket=socket;
 		this.client = client;
-		this.connectionFrame = connectionFrame;
-		this.adress = adress;
-		this.port = port;
+		
+		connectionFrame = client.getConnectionFrame();
 	}
 	
 	public void sayToClient(String answer)
@@ -41,12 +41,11 @@ public class ClientWorker implements Runnable
 	}
 	
 	
-	public void listenSocket(String adress, int port)
+	public void listenSocket() throws NullPointerException
 	{
 		
 	        try 
 	        {
-	        	socket = new Socket(adress, port);
 	        	out = new PrintWriter(socket.getOutputStream(), true);
 	        	in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	          
@@ -99,7 +98,6 @@ public class ClientWorker implements Runnable
 		        
 		        if(text.equals("Game starts!"))
 		        {
-		        	System.out.println("Client game");
 		        	connectionFrame.setVisible(false);
 		        	
 		        	client.invokeGameFrame();
@@ -111,7 +109,26 @@ public class ClientWorker implements Runnable
 	@Override
 	public void run()
 	{
-		listenSocket(adress, port);
+		try
+		{
+			listenSocket();
+		}
+		catch(NullPointerException e)
+		{
+			System.out.println("Unexpected end");
+		}
 		
 	}
+	
+	protected void finalize() {
+        try 
+        {
+          in.close();
+          out.close();
+        } 
+        catch (IOException e) 
+        {
+          System.out.println("Could not close.");// System.exit(-1);
+        }
+    }
 }
