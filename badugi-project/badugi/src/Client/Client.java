@@ -27,7 +27,7 @@ public class Client{
 	private ClientWorker clientWorker;
 	PrintWriter out = null;
 	String text;
-	
+	int cardCounter = 0;
 	Client()
 	{
 		connectionFrame = new ConnectionFrame(this); 
@@ -84,7 +84,6 @@ public class Client{
 	 * 	*/
 	public void sendQueryToServer(String query)
 	{
-		
 		out.println(query);
 	}
 	
@@ -102,6 +101,22 @@ public class Client{
 		}
 	}
 	
+	public void getCards()
+	{
+		for(int i=0; i<4; i++)
+		{
+			sendQueryToServer("Take card");
+		}
+	}
+	/*Function to take new cards
+	 * Game Frame or just cards views should be refreshed*/
+	public void takeNewCard(String color, String figure)
+	{
+		playerHand[cardCounter].setCardColor(Integer.parseInt(color));
+		playerHand[cardCounter].setCardFigure(Integer.parseInt(figure));
+		
+		cardCounter++;
+	}
 	public void setAsDealer()
 	{
 		isDealer = true;

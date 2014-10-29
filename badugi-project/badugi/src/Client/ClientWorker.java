@@ -103,6 +103,17 @@ public class ClientWorker implements Runnable
 		        	client.invokeGameFrame();
 		        	client.initSuit();	        	
 		        }
+		        if(text.equals("First card distribution"))
+		        {
+		        	client.getCards();
+		        }
+		      //!!!   Format is like "New card x y" where x - card color, y - card figure
+		        if(text.startsWith("New card"))
+		        {
+		        	String color = String.valueOf(text.charAt(9));
+		        	String figure = text.substring(11);	
+		        	client.takeNewCard(color, figure);
+		        }
 			}      
     }
 
