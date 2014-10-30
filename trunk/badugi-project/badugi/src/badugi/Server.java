@@ -3,6 +3,7 @@ package badugi;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 
 /*
  * Segregate Server and ClientWorker work
@@ -16,19 +17,22 @@ import java.net.*;
 public class Server 
 {
 
-	private int port;
+	//private int port;
+	//private Game game;
+	//private Socket players[];
 	private int money;
 	private int playersNumber;
 	
 	private int playersCounter = 0;
 	private ServerSocket socket;
-	private Socket players[];  
-	private Game game;
+	
+	private ArrayList<Socket> players = new ArrayList<Socket>();
+	
 	
 	Server(int playersNumber, int money, int port)
 	{
 		
-		this.port = port;
+		//this.port = port;
 		this.money = money;
 		this.playersNumber = playersNumber;
 		
@@ -42,7 +46,7 @@ public class Server
 			System.exit(-1);
 		}
 		
-		players = new Socket[playersNumber]; 
+		//players = new Socket[playersNumber]; 
 
 	}
 	
@@ -55,13 +59,13 @@ public class Server
 			
 				try
 				{
-					
-					players[playersCounter] = socket.accept();
+					players.add(socket.accept());
+					//players[playersCounter] = socket.accept();
 					
 					PrintWriter out = null;
 					try
 					{
-						out = new PrintWriter(players[playersCounter].getOutputStream(), true);
+						out = new PrintWriter(players.get(playersCounter).getOutputStream(), true);
 						
 					}
 					catch (IOException e)
@@ -83,7 +87,15 @@ public class Server
 				if(playersCounter  == playersNumber )
 				{
 					System.out.println("Game starts, Server");
-					game = new Game(players, money);
+					new Game(players, money);
+					/*try
+					{
+						/new Game(players, money);
+					}
+					catch(NullPointerException e)
+					{
+						System.out.println("Client disconected");
+					}*/
 				}
 			}
 			else

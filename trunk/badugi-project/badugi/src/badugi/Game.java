@@ -3,54 +3,35 @@ package badugi;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Game
 {
 	private int round;
-	private int bank, money, port;
-	private Socket players[];
-	private Card suit[];
+	private int bank, money;
+	private ArrayList<Socket> players;
+	private ArrayList<Card> suit = new ArrayList<Card>();
 	public Random random = new Random();
 	
 	/*
 	 * Initializing card suite
 	 */
-	Game(Socket players[], int money)
+	Game(ArrayList<Socket> players, int money)
 	{
 		
 		this.players = players;
 		this.money = money;
 		
-		suit = new Card[52];
+		initializeSuit();
 		
-		for(int i=1; i<=13; i++)
-		{
-			for(int j=1; j<=4; j++)
-			{
-				suit[i*j-1] = new Card(i,j);
-			}
-		}
+		sayForAllPlayers("Game starts!", false);
 		
-		for(int i=0; i < players.length; i++)
-		{
-			PrintWriter out = null;
-			try
-			{
-				out = new PrintWriter(players[i].getOutputStream(), true);
-			} 
-			catch (IOException e)
-			{
-				System.out.println("I/O Exception");
-			}
-						
-			out.println("Game starts!");		
-		}
+		sayForAllPlayers("First card distribution", true);
+		sayForAllPlayers("Start cash "+money, false);
 		
-		firstCardDistribution();
 		
 		/*for(int i=0; i < players.length; i++)
 		{
@@ -65,11 +46,14 @@ public class Game
 	
 	String takeNewCard()
 	{
-		Card randomCard = suit[random.nextInt(52)];
-		String cardDescription = new String(String.valueOf(randomCard.getCardColor())+ " " + randomCard.getCardFigure());
-		System.out.println(cardDescription);
+		Card randomCard = suit.get(random.nextInt(52));
+
+		System.out.println("figure "+String.valueOf(randomCard.figure));
+		System.out.println("color "+String.valueOf(randomCard.colour));
 		
-		return cardDescription;
+		
+		
+		return String.valueOf(randomCard.getCardColor())+ " " + String.valueOf(randomCard.getCardFigure());
 	}
 	
 	void nullBank()
@@ -82,14 +66,50 @@ public class Game
 		round++;
 	}
 	
-	void firstCardDistribution()
+	void initializeSuit()
 	{
-		for(int i=0; i < players.length; i++)
+		
+		
+		for(int i=1; i<=4; i++)
+		{
+			for(int j=1; j<=13; j++)
+			{
+				suit.add(new Card(i,j));
+			}
+		}
+	}
+	
+	void sayForAllPlayers(String phrase, boolean waitForAnswer)
+	{
+		for(int i=0; i < players.size(); i++)
 		{
 			PrintWriter out = null;
 			try
 			{
-				out = new PrintWriter(players[i].getOutputStream(), true);
+				out = new PrintWriter(players.get(i).getOutputStream(), true);
+			} 
+			catch (IOException e)
+			{
+				System.out.println("I/O Exception");
+			}
+						
+			out.println(phrase);	
+			
+			if(waitForAnswer)
+			{
+				listenForPlayer(players.get(i));
+			}
+		}
+	}
+	
+	/*void firstCardDistribution()
+	{
+		for(int i=0; i < players.size(); i++)
+		{
+			PrintWriter out = null;
+			try
+			{
+				out = new PrintWriter(players.get(i).getOutputStream(), true);
 			} 
 			catch (IOException e)
 			{
@@ -97,9 +117,9 @@ public class Game
 			}
 						
 			out.println("First card distribution");	
-			listenForPlayer(players[i]);
+			listenForPlayer(players.get(i));
 		}
-	}
+	}*/
 	
 	void listenForPlayer(Socket player)
 	{
@@ -121,8 +141,9 @@ public class Game
 		{	
 			try
 			{
-				System.out.println("[eq");
-				text = in.readLine();					
+				System.out.println("Waiting for player answer...");
+				text = in.readLine();
+				System.out.println("Player answer: '" + text +"'");
 			} 
 	        	
 			catch (IOException e)
@@ -130,14 +151,10 @@ public class Game
 				System.out.println("No I/O while listening"); 
 			}
 			
-			/*if(text.equals("ready"))
-			{
-				System.out.println("Player ready"); 
-			}*/
 			if(text.equals("Take cards"))
 			{
 				startCardsDistribution(out);
-				out.close();
+				//out.println("");
 				return;
 			}
 			
@@ -150,6 +167,7 @@ public class Game
 		for(int i=0; i < 4; i++)
 		{
 			String cardDescription = takeNewCard();
+			System.out.println("Card description: " +cardDescription); 
 			out.println("New card "+cardDescription);
 		}
 	}

@@ -3,6 +3,7 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 
 import badugi.Card;
@@ -18,8 +19,8 @@ import badugi.Card;
 public class Client{
 
 	private Socket socket = null;
-	private Card suit[];
-	private Card playerHand[] = new Card[4];
+	private ArrayList<Card> suit = new ArrayList<Card>();
+	private ArrayList<Card> playerHand = new ArrayList<Card>();
 	private int playerMoney;
 	private boolean isDealer;
 	private ConnectionFrame connectionFrame;
@@ -88,32 +89,26 @@ public class Client{
 	}
 	
 	/*initiate suit, after player joins game*/
-	public void initSuit()
+	public void initializeSuit()
 	{
-		suit = new Card[52];
-		
-		for(int i=1; i<=13; i++)
+		for(int i=1; i<=4; i++)
 		{
-			for(int j=1; j<=4; j++)
+			for(int j=1; j<=13; j++)
 			{
-				suit[i*j-1] = new Card(i,j);
+				suit.add(new Card(i,j));
 			}
 		}
 	}
 	
 	public void getCards()
 	{
-		for(int i=0; i<4; i++)
-		{
-			sendQueryToServer("Take card");
-		}
+			sendQueryToServer("Take cards");
 	}
 	/*Function to take new cards
 	 * Game Frame or just cards views should be refreshed*/
 	public void takeNewCard(String color, String figure)
 	{
-		playerHand[cardCounter].setCardColor(Integer.parseInt(color));
-		playerHand[cardCounter].setCardFigure(Integer.parseInt(figure));
+		playerHand.add(new Card(Integer.parseInt(color),Integer.parseInt(figure)));
 		
 		cardCounter++;
 	}
@@ -127,11 +122,14 @@ public class Client{
 		return connectionFrame;
 	}
 	
-	
+	void setPlayerMoney(int cash)
+	{
+		playerMoney = cash;
+	}
 	
 	public static void main(String[] args) 
 	{
-		Client client = new Client();
+		new Client();
 	}
 	
 }
