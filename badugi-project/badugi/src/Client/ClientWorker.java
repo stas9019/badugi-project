@@ -48,8 +48,6 @@ public class ClientWorker implements Runnable
 	        {
 	        	out = new PrintWriter(socket.getOutputStream(), true);
 	        	in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-	          
-	        	//System.out.println("Connected on " + socket.getPort());
 	        }
 	        catch(NullPointerException e)
 	        {
@@ -79,7 +77,8 @@ public class ClientWorker implements Runnable
 	        	
 		        try
 				{
-					text = in.readLine();					
+					text = in.readLine();
+					System.out.println("Client worker " +text);
 				} 
 	        	
 	        	catch (IOException e)
@@ -101,19 +100,29 @@ public class ClientWorker implements Runnable
 		        	connectionFrame.setVisible(false);
 		        	
 		        	client.invokeGameFrame();
-		        	client.initSuit();	        	
+		        	client.initializeSuit();	        	
 		        }
+		        
+		        if(text.startsWith("Start cash "))
+		        {
+		        	int cash = Integer.parseInt(text.substring(11));
+		        	client.setPlayerMoney(cash);
+		        	System.out.println("Player cash "+cash);
+		        }
+		        
 		        if(text.equals("First card distribution"))
 		        {
 		        	client.getCards();
 		        }
-		      //!!!   Format is like "New card x y" where x - card color, y - card figure
+		        //!!!   Format is like "New card x y" where x - card color, y - card figure
 		        if(text.startsWith("New card"))
 		        {
 		        	String color = String.valueOf(text.charAt(9));
 		        	String figure = text.substring(11);	
 		        	client.takeNewCard(color, figure);
 		        }
+		        
+		        
 			}      
     }
 
@@ -126,7 +135,8 @@ public class ClientWorker implements Runnable
 		}
 		catch(NullPointerException e)
 		{
-			System.out.println("Unexpected end");
+			//listenSocket();
+			System.out.println("end");
 		}
 		
 	}

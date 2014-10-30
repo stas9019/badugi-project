@@ -1,15 +1,18 @@
 package badugi;
 
+/*♥♦♣♠ ♡♢♧♤*/
+
 public class Card 
 {
-	private int color;
-	private int figure;
+	public int colour;
+	public int figure;
 	private boolean beenUsed;
 	
 	public Card(int colour, int figure)
 	{
-		this.color = colour;
+		this.colour = colour;
 		this.figure = figure;
+		//System.out.println("New card "+colour+figure);
 		beenUsed = false;
 	}
 	
@@ -27,16 +30,16 @@ public class Card
 	 
 	public void setCardColor(int cardColor)
 	{
-		this.color = cardColor;
+		this.colour = cardColor;
 	}
 	public void setCardFigure(int cardFigure)
 	{
-		this.figure = figure;
+		this.figure = cardFigure;
 	}
 
 	public int getCardColor()
 	{
-		return color;
+		return colour;
 	}
 	
 	public int  getCardFigure()
