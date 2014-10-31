@@ -22,19 +22,19 @@ public class Server
 	//private Socket players[];
 	private int money;
 	private int playersNumber;
-	
+	private int smallBlind;
 	private int playersCounter = 0;
 	private ServerSocket socket;
 	
 	private ArrayList<Socket> players = new ArrayList<Socket>();
 	
 	
-	Server(int playersNumber, int money, int port)
+	Server(int playersNumber, int money, int port, int smallBlind)
 	{
 		
-		//this.port = port;
 		this.money = money;
 		this.playersNumber = playersNumber;
+		this.smallBlind = smallBlind;
 		
 		try 
 		{
@@ -87,7 +87,7 @@ public class Server
 				if(playersCounter  == playersNumber )
 				{
 					System.out.println("Game starts, Server");
-					new Game(players, money);
+					new Game(players, money, smallBlind);
 					/*try
 					{
 						/new Game(players, money);
@@ -118,6 +118,9 @@ public class Server
 	 * args[0] - Number of players
 	 * args[1] - Start sum for each player
 	 * args[2] - Server port
+	 * args[3] - small blind
+	 * 
+	 * Do Exceptions and checking values
 	 */
 	public static void main(String[] args) 
 	{
@@ -125,7 +128,7 @@ public class Server
 		int playersNumber = 0;
 		int money = 0;
 		int serverPort = 0;
-		
+		int smallBlind = 0;
 		/*TO-DO
 		 * Check parameters
 		 * */
@@ -134,7 +137,7 @@ public class Server
 			playersNumber = Integer.parseInt(args[0]);
 			money = Integer.parseInt(args[1]);
 			serverPort = Integer.parseInt(args[2]);
-			
+			smallBlind = Integer.parseInt(args[3]);			
 		}
 		catch(NumberFormatException e)
 		{
@@ -142,7 +145,7 @@ public class Server
 			return;
 		}
 		
-		Server server = new Server(playersNumber, money, serverPort);
+		Server server = new Server(playersNumber, money, serverPort, smallBlind);
 		server.listenSocket();
 
 	}

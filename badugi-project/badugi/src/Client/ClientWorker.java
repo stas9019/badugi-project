@@ -33,12 +33,12 @@ public class ClientWorker implements Runnable
 		connectionFrame = client.getConnectionFrame();
 	}
 	
-	public void sayToClient(String answer)
+	/*public void sayToClient(String answer)
 	{
 		
 		out.println(answer);
 		System.out.println("Client worker " +answer);
-	}
+	}*/
 	
 	
 	public void listenSocket() throws NullPointerException
@@ -78,7 +78,7 @@ public class ClientWorker implements Runnable
 		        try
 				{
 					text = in.readLine();
-					System.out.println("Client worker " +text);
+					System.out.println("Client worker: " +text);
 				} 
 	        	
 	        	catch (IOException e)
@@ -110,10 +110,24 @@ public class ClientWorker implements Runnable
 		        	System.out.println("Player cash "+cash);
 		        }
 		        
+		        if(text.startsWith("Small blind "))
+		        {
+		        	int smallBlind = Integer.parseInt(text.substring(12));
+		        	client.setBlinds(smallBlind);
+		        	System.out.println("Small blind "+smallBlind);
+		        }
+		        
+		        if(text.startsWith("Dealer"))
+		        {
+		        	client.setAsDealer();
+		        	System.out.println("You are dealer");
+		        }
+		        
 		        if(text.equals("First card distribution"))
 		        {
-		        	client.getCards();
+		        	client.sendQueryToServer("Take cards");
 		        }
+		        
 		        //!!!   Format is like "New card x y" where x - card color, y - card figure
 		        if(text.startsWith("New card"))
 		        {
@@ -122,7 +136,33 @@ public class ClientWorker implements Runnable
 		        	client.takeNewCard(color, figure);
 		        }
 		        
+		        if(text.startsWith("Bet small blind"))
+		        {
+		        	client.betSmallBlind();
+		        }
 		        
+		        if(text.startsWith("Bet big blind"))
+		        {
+		        	client.betBigBlind();
+		        }
+		        
+		        if(text.startsWith("Auction "))
+		        {
+		        	int currentPot = Integer.parseInt(text.substring(8));
+		        	client.auction(currentPot);
+		        }
+		        
+		        if(text.startsWith("Check pot"))
+		        {
+		        	//int currentPot = Integer.parseInt(text.substring(8));
+		        	client.checkPot()/*just empty prototype, even shouldn't be called*/;
+		        }
+		        
+		        if(text.startsWith("Change cards"))
+		        {
+		        	client.changeCards();
+		        }
+		       
 			}      
     }
 

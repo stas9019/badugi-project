@@ -24,7 +24,7 @@ public class ConnectionFrame extends JFrame implements ActionListener
 		
 		setSize(250,200);
 		setTitle("Getting Connection");
-		setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null); //set JFrame in the middle of screen
 		setResizable(false); //not allowed do change size of JFrame
 		setLayout(null);
