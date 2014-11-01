@@ -171,7 +171,7 @@ public class GameFrame2 extends JFrame implements ActionListener
 		bFold.setEnabled(!b);
 	}
 	
-	protected void blockYourBidField(boolean b)
+	protected void blockYourBidField(boolean b)		// is necessary?
 	{
 		
 		tBid.setEnabled(!b);
@@ -190,6 +190,8 @@ public class GameFrame2 extends JFrame implements ActionListener
 	/*_________________________________________________
 	 *            Set/get functions part
 	 *_________________________________________________*/
+	
+	//set player pot function
 	
 	protected void setYourMoney(String playerMoney)
 	{
@@ -265,7 +267,16 @@ public class GameFrame2 extends JFrame implements ActionListener
 		
 		if(event.getSource() == bChange)
 		{
-			client.changeCards();
+			
+			for(int i=3; i>=0; i--)
+			{
+				if(boxes[i].isSelected())
+				{
+					client.changeCards(i);
+				}
+			}
+			client.sendQueryToServer("End of changing");
+			blockChangeButton(true);
 		}
 		
 		//bConfirm, bBet, bCall, bRaise, bAllIn, bCheck, bFold, bChange

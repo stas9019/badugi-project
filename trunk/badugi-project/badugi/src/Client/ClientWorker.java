@@ -119,13 +119,20 @@ public class ClientWorker implements Runnable
 		        
 		        if(text.startsWith("Dealer"))
 		        {
-		        	client.setAsDealer();
+		        	client.setAsDealer(true);
+		        	System.out.println("You are dealer");
+		        }
+		        
+		        if(text.startsWith("You are not dealer anymore"))//add to game class
+		        {
+		        	client.setAsDealer(false);
 		        	System.out.println("You are dealer");
 		        }
 		        
 		        if(text.equals("First card distribution"))
 		        {
-		        	client.sendQueryToServer("Take cards");
+		        	client.newGameStarted();
+		        	client.sendQueryToServer("Issue 4 cards");
 		        }
 		        
 		        //!!!   Format is like "New card x y" where x - card color, y - card figure
@@ -160,7 +167,7 @@ public class ClientWorker implements Runnable
 		        
 		        if(text.startsWith("Change cards"))
 		        {
-		        	client.changeCards();
+		        	client.cardChangingStage();
 		        }
 		       
 			}      
