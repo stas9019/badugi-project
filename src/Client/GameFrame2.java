@@ -1,9 +1,9 @@
 package Client;
 import java.awt.Color;
-import java.awt.Graphics;
+//import java.awt.Graphics;							// revision 30
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
+//import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -13,23 +13,27 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
+//import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 	/*
 	 * To Add:
 	 * Dealer/smallBlind/bigBlind
-	 * Status
-	 * change button + checkBoxes
+	 * make Status bar which will inform about some general processes f.ex. card changing, some player made pot ... etc
+	 * player pot					change places of current pot and player pot
 	 * time left label(not necessary, maybe if we will have time to do this)
 	 * if we leaving text labels on cards, it can look better with bigger size and colors
 	 */
 
 public class GameFrame2 extends JFrame implements ActionListener
 {
+	/**
+	 * serial version?
+	 */
+	private static final long serialVersionUID = -2977435916670193465L;
 	private Client client;
 	private JButton bConfirm, bBet, bCall, bRaise, bAllIn, bCheck, bFold, bChange;
-	private JLabel lMoney, lPot;
+	private JLabel lMoney, lCurrPot, lPot;
 	private JButton cards[] = new JButton[4];
 	private JCheckBox boxes[] = new JCheckBox[4];
 	private JTextField tBid;
@@ -53,16 +57,22 @@ public class GameFrame2 extends JFrame implements ActionListener
 		}
 
 		lMoney = new JLabel("  Your money: ");
-		lMoney.setBounds(25, 285, 205, 20);
+		lMoney.setBounds(25, 85, 205, 20);				//revision 30
 		lMoney.setBackground(new Color(250,250,250));
 		lMoney.setOpaque(true);
 		add(lMoney);
-				
-		lPot = new JLabel("  Current pot: ");
-		lPot.setBounds(235, 285, 205, 20);
+			
+		lPot = new JLabel("  Your pot: ");				//revision 30
+		lPot.setBounds(25, 285, 205, 20);
 		lPot.setBackground(new Color(250,250,250));
 		lPot.setOpaque(true);
 		add(lPot);
+		
+		lCurrPot = new JLabel("  Current pot: ");
+		lCurrPot.setBounds(235, 285, 205, 20);
+		lCurrPot.setBackground(new Color(250,250,250));
+		lCurrPot.setOpaque(true);
+		add(lCurrPot);
 		
 		tBid = new JTextField("  Your bid: ");
 		tBid.setBounds(445, 285, 100, 20);
@@ -175,7 +185,7 @@ public class GameFrame2 extends JFrame implements ActionListener
 	{
 		
 		tBid.setEnabled(!b);
-		bConfirm.setEnabled(!b);
+		//bConfirm.setEnabled(!b);
 		
 		if(b)
 		{
@@ -187,6 +197,11 @@ public class GameFrame2 extends JFrame implements ActionListener
 		}
 	}
 	
+	protected void blockCheckBoxes(boolean b)
+	{
+		for(int i=3; i>=0; i--)
+			boxes[i].setEnabled(!b);
+	}
 	/*_________________________________________________
 	 *            Set/get functions part
 	 *_________________________________________________*/
@@ -203,14 +218,14 @@ public class GameFrame2 extends JFrame implements ActionListener
 		cards[cardNum].setText(view);
 	}
 	
-	protected void setCurrentPot(int currentPot)
+	protected void setCurrentPot(int currentPot)//revision 30
 	{
-		lPot.setText("  Current pot: " + currentPot);
+		lCurrPot.setText("  Current pot: " + currentPot);
 	}
 	
-	protected void setYourPot(String playerMoney)
+	protected void setYourPot(int playerMoney)
 	{
-		//lMoney.setText(lMoney.getText() + playerMoney);
+		lPot.setText("  Your pot: " + playerMoney);
 	}
 	
 	protected int getYourBid()
@@ -273,14 +288,15 @@ public class GameFrame2 extends JFrame implements ActionListener
 				if(boxes[i].isSelected())
 				{
 					client.changeCards(i);
+					boxes[i].setSelected(false);	//revision 30	
 				}
 			}
-			client.sendQueryToServer("End of changing");
+			
 			blockChangeButton(true);
+			blockCheckBoxes(true);					//revision 30
+			client.sendQueryToServer("End of changing");
+			
 		}
-		
-		//bConfirm, bBet, bCall, bRaise, bAllIn, bCheck, bFold, bChange
-		
 	}
 	
 }

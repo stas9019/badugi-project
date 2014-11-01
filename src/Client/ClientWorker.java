@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import badugi.Game;
-
 /*TO-DO
  * Finalize method
  * */
@@ -131,8 +129,7 @@ public class ClientWorker implements Runnable
 		        
 		        if(text.equals("First card distribution"))
 		        {
-		        	client.newGameStarted();
-		        	client.sendQueryToServer("Issue 4 cards");
+		        	client.newGameStarted();	
 		        }
 		        
 		        //!!!   Format is like "New card x y" where x - card color, y - card figure
@@ -161,8 +158,7 @@ public class ClientWorker implements Runnable
 		        
 		        if(text.startsWith("Check pot"))
 		        {
-		        	//int currentPot = Integer.parseInt(text.substring(8));
-		        	client.checkPot()/*just empty prototype, even shouldn't be called*/;
+		        	client.checkPot();
 		        }
 		        
 		        if(text.startsWith("Change cards"))

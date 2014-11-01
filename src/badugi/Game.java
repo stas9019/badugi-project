@@ -11,8 +11,8 @@ import java.util.Random;
 
 public class Game
 {
-	private int round;
-	private int bank, money, smallBlind, bigBlind, currentPot;//smallBlind?
+	//private int round; removed //revision 30
+	private int bank, smallBlind, bigBlind, currentPot;//money removed //revision 30
 	private int dealerPosition;
 	private ArrayList<Socket> players;
 	private ArrayList<Socket> leftPlayers;
@@ -25,14 +25,13 @@ public class Game
 	{
 		
 		this.players = players;
-		this.money = money;
 		this.smallBlind = smallBlind;
 		bigBlind=2*smallBlind;
 		
-		leftPlayers = new ArrayList<Socket>(players);
+		leftPlayers = new ArrayList<Socket>(players);			// is necessary? revision 30
 		
 		
-		initializeSuit();
+		//initializeSuit();					//revision 30
 		
 		informAllPlayers("Game starts!", false);
 		informAllPlayers("Start cash "+money, false);
@@ -50,6 +49,7 @@ public class Game
 	
 	private void informAllPlayers(String phrase, boolean waitForAnswer)
 	{
+		System.out.println("Informing All Players: " +phrase);
 		for(int i=0; i < players.size(); i++)
 		{
 			PrintWriter out = null;
@@ -59,9 +59,10 @@ public class Game
 			} 
 			catch (IOException e)
 			{
-				System.out.println("I/O Exception");
+				System.out.println("I/O Exception");					//remove player also?	
+				
 			}
-						
+			System.out.println("Informing Player "+i);
 			out.println(phrase);	
 			
 			if(waitForAnswer)
@@ -72,15 +73,17 @@ public class Game
 				}
 				catch (NullPointerException e)
 				{
-					System.out.println("Client " +i +" disconected");
+					playerDisconected(i);				// revision 30
+					
+					/*System.out.println("Client " +i +" disconected");
 					players.remove(i);
 					
-					/*not working with many players, maybe cause remove not very fast */
+					??not working with many players, maybe cause remove not very fast 
 					if(players.size() < 2)
 					{
-						System.out.println("Game over");
+						System.out.println("Game over - just one player remain");
 						System.exit(0);
-					}
+					}*/
 						
 				}
 				
@@ -90,6 +93,8 @@ public class Game
 
 	private void informAllLeftPlayers(String phrase, boolean waitForAnswer)
 	{
+		System.out.println("Informing All left Players: " +phrase);	
+		
 		for(int i=0; i < leftPlayers.size(); i++)
 		{
 			PrintWriter out = null;
@@ -101,7 +106,7 @@ public class Game
 			{
 				System.out.println("I/O Exception");
 			}
-						
+			System.out.println("Informing Player "+i);	
 			out.println(phrase);	
 			
 			if(waitForAnswer)
@@ -114,15 +119,17 @@ public class Game
 				}
 				catch (NullPointerException e)
 				{
-					System.out.println("Client " +i +" disconected");
+					playerDisconected(i);				// revision 30
+					
+					/*System.out.println("Client " +i +" disconected");
 					leftPlayers.remove(i);
 					
-					/*not working with many players, maybe cause remove not very fast */
+					??not working with many players, maybe cause remove not very fast 
 					if(leftPlayers.size() < 2)
 					{
-						System.out.println("Game over");
+						System.out.println("Game over - just one player remain");
 						System.exit(0);
-					}
+					}*/
 						
 				}
 				
@@ -137,6 +144,7 @@ public class Game
 		{
 			out = new PrintWriter(players.get(playerNum).getOutputStream(), true);
 			
+			System.out.println("Informing concrete Player "+playerNum +": "+ phrase);			
 			out.println(phrase);	
 			
 			if(waitForAnswer)
@@ -150,22 +158,23 @@ public class Game
 		}
 		catch (NullPointerException e)
 		{
-			System.out.println("Player disconected");
+			playerDisconected(playerNum);				// revision 30
+			/*
+			System.out.println("Player "+playerNum +" disconected");
 			players.remove(playerNum);
 			leftPlayers.remove(playerNum);
 			
 			if(players.size() < 2)
 			{
-				System.out.println("Game over");
+				System.out.println("Game over - just one player remain");
 				System.exit(-1);		
 			}
+			*/
 		}		
 		
 	}
 
-	@SuppressWarnings("resource")
 	private void listenForPlayer(Socket player)
-
 	{
 		BufferedReader in = null;
 		PrintWriter out = null;
@@ -185,9 +194,9 @@ public class Game
 		{	
 			try
 			{
-				System.out.println("Waiting for player answer...");
+				System.out.println("Waiting for player "+players.indexOf(player)+" answer...");
 				text = in.readLine();
-				System.out.println("Player answer: '" + text +"'");
+				System.out.println("Player "+players.indexOf(player)+" answer: '" + text +"'");
 			} 
 	        	
 			catch (IOException e)
@@ -221,6 +230,11 @@ public class Game
 				return;
 			}
 			
+			if(text.equals("End of returning"))			//revision 30
+			{
+				System.out.println("Return end");
+				return;
+			}
 			/*Add to client worker*/
 			if(text.equals("Small Blind"))
 			{
@@ -236,7 +250,11 @@ public class Game
 			
 			if(text.equals("Fold"))
 			{
-				leftPlayers.remove(player);
+				//just for continue listening and more understandability 
+			}
+			
+			if(text.equals("I'm Fold"))//revision 30
+			{  
 				return;
 			}
 			
@@ -296,14 +314,14 @@ public class Game
 			{
 				System.out.println("I/O Exception");
 			}
-						
+				
 			out.println("Check pot");	
 			
 				try
 				{
 					pot = checkConcretePlayerPot(leftPlayers.get(i));
 					
-					if(pot.equals("-1"))					//especially for all in case
+					if(pot.equals("-1"))					//especially for all in case, also for fold maybe
 						pot = String.valueOf(currentPot);
 				}
 				catch (NullPointerException e)
@@ -331,7 +349,7 @@ public class Game
 		return true;
 	}
 	
-	private String checkConcretePlayerPot(Socket player)
+	private String checkConcretePlayerPot(Socket player)				// maybe join with previous function revision 30
 	{
 		BufferedReader in = null;
 		try
@@ -364,6 +382,19 @@ public class Game
 		return text;
 	}
 	
+	private void playerDisconected(int playerNum)				//revision 30
+	{
+		System.out.println("Player "+playerNum +" disconected");
+		players.remove(playerNum);
+		leftPlayers.remove(playerNum);
+		
+		if(players.size() < 2)
+		{
+			System.out.println("Game over - just one player remain");
+			System.exit(0);		
+		}
+	}
+	
 	/*_________________________________________________
 	 *             Game process part
 	 *_________________________________________________*/
@@ -378,6 +409,7 @@ public class Game
 			//Collections.copy(leftPlayers, players);  /*beware of players*/
 			leftPlayers = new ArrayList<Socket>(players);
 			
+			initializeSuit();						//revision 30
 			
 			informAllPlayers("First card distribution", true);
 			
@@ -388,28 +420,31 @@ public class Game
 			informConcretePlayer("Bet small blind", whoBetSmallBlind, true);//wait for response, if they have enough money, should be true
 			informConcretePlayer("Bet big blind", whoBetBigBlind, true);
 					
+			currentPot = bigBlind;
+			
 			for(int i=1; i<=4; i++ )
 			{
 				System.out.println("Round "+i);
 				
 				startAuctionRound();
-				informAllLeftPlayers("Change cards", true);
 				
-				nextRound(); //just ++
+				if(i!=4)											//no card changing after first round
+					informAllLeftPlayers("Change cards", true);
+				
+				//nextRound(); //just ++ removed //revision 30
 			}
 			
 			/*final stage*/
 			//some function for final stage
-			//nullBank();
-			//nullCurrentPot();//?
-			//changeDealer();//?
+			//finalStage();
+			nullBank();
+			nullCurrentPot();//?
+			changeDealer();//?
 		}
 	}
 	
 	private void startAuctionRound()
 	{
-		currentPot = bigBlind;
-		
 		boolean equality=false;
 		
 		while(!equality)
@@ -430,12 +465,11 @@ public class Game
 	/*should be more complicated*/
 	private void changeDealer()
 	{
-		informConcretePlayer("You are not dealer anymore", dealerPosition, false
-				);
+		informConcretePlayer("You are not dealer anymore", dealerPosition, false);
 		dealerPosition = (++dealerPosition)%players.size();	//test it
 	}
 	
-	private void nullBank()
+	private void nullBank()		//just for easier understanding
 	{
 		bank = 0;
 	}
@@ -445,10 +479,10 @@ public class Game
 		currentPot = 0;
 	}
 	
-	private void nextRound()
+	/*private void nextRound()		//removed revision 30
 	{
 		round++;
-	}
+	}*/
 	
 	
 	/*_________________________________________________
@@ -458,7 +492,7 @@ public class Game
 	
 	private void initializeSuit()
 	{
-
+		suit.clear();
 		for(int i=1; i<=4; i++)
 		{
 			for(int j=1; j<=13; j++)
@@ -474,15 +508,18 @@ public class Game
 	/*Maybe can be with integer parameter for changing cards also*/
 	private void startCardsDistribution(PrintWriter out, int amount)
 	{
+		if(suit.size() < amount)						//revision 30
+			suit = new ArrayList<Card>(secondSuit);
+		
 		for(int i=0; i < amount; i++)
 		{
-			String cardDescription = takeNewCard();
+			String cardDescription = issueNewCard();
 			System.out.println("Card description: " +cardDescription); 
 			out.println("New card "+cardDescription);
 		}
 	}
 		
-	private String takeNewCard()
+	private String issueNewCard()//revision 30
 	{
 		
 		int whichCard = random.nextInt(suit.size());
