@@ -37,7 +37,8 @@ public class Client{
 	private int currentPot 	= 0;
 	private int playerPot 	= 0;
 	
-	private boolean isDealer;
+	//private boolean isDealer = false;
+	private boolean isAllIn = false;	//for a new game make false again
 	
 	private ConnectionFrame connectionFrame;
 	private GameFrame2 		gameFrame;
@@ -119,11 +120,17 @@ public class Client{
 	{
 		Card newCard = new Card(Integer.parseInt(color),Integer.parseInt(figure));
 		playerHand.add(newCard);
-		prepareCardView(newCard);
+		//prepareCardView(newCard);
 		cardCounter++; /*maybe function check card counter*/
+		
+		if(cardCounter == 4)
+		{
+			for(int i=0; i<4; i++)
+				prepareCardView(playerHand.get(i), i);
+		}
 	}
 	
-	private void prepareCardView(Card card)
+	private void prepareCardView(Card card, int index)
 	{
 		String view="";
 		
@@ -171,13 +178,19 @@ public class Client{
 				view+="K";break;	
 		}
 		
-		gameFrame.setCardView(cardCounter, view);
+		gameFrame.setCardView(index, view);
 	}
 	
-	protected void changeCards()
+	protected void changeCards(int index)
 	{
-		System.out.println("Player should change cards");//all system.out to status bar
-		gameFrame.blockChangeButton(false);
+		//return card
+		sendQueryToServer("Take card back "+playerHand.get(index).getCardColor() +" " + playerHand.get(index).getCardFigure());
+		
+		playerHand.remove(index);
+		cardCounter--;
+		
+		sendQueryToServer("Issue one card");
+		//take new card query
 	}
 	
 	/*_________________________________________________
@@ -218,22 +231,29 @@ public class Client{
 		currentPot = pot;
 		gameFrame.setCurrentPot(pot);
 		
+		if(isAllIn)
+			sendQueryToServer("Check");	
+		
 		if(playerMoney < currentPot)
 		{
 			gameFrame.blockCallButton(true);
 			gameFrame.blockRaiseButton(true);
 			gameFrame.blockCheckButton(true);
 			gameFrame.blockYourBidField(true);
+			
+			gameFrame.blockAllInButton(false);
+			gameFrame.blockFoldButton(false);
 		}
 		if(playerMoney == currentPot)
 		{
 			gameFrame.blockCallButton(true);
 			gameFrame.blockRaiseButton(true);
 			gameFrame.blockYourBidField(true);
-			gameFrame.blockAllInButton(true);
 			
 			gameFrame.blockFoldButton(false);
 			gameFrame.blockCheckButton(false);
+			gameFrame.blockCallButton(false);
+			gameFrame.blockAllInButton(false);
 			
 		}
 		if(playerMoney > currentPot)
@@ -243,23 +263,56 @@ public class Client{
 		
 		if(playerPot == currentPot)
 		{
-			gameFrame.blockCheckButton(false);
 			gameFrame.blockCallButton(true);
+			
+			gameFrame.blockCheckButton(false);
+			gameFrame.blockRaiseButton(false);
+			gameFrame.blockYourBidField(false);
+			gameFrame.blockAllInButton(false);
 		}
 		
-		if(playerPot < currentPot)
+		if((playerPot < currentPot)&&(playerMoney+playerPot < currentPot))
 		{
 			gameFrame.blockCheckButton(true);
-			gameFrame.blockCallButton(false);
+			
+			gameFrame.blockAllInButton(false);
+			gameFrame.blockFoldButton(false);
 		}
 		
-		/*if your money == 0 ?*/
+		if((playerPot < currentPot)&&(playerMoney+playerPot >= currentPot))
+		{
+			gameFrame.blockCheckButton(true);
+			
+			gameFrame.blockCallButton(false);
+			gameFrame.blockAllInButton(false);
+			gameFrame.blockFoldButton(false);
+			
+			if(playerMoney+playerPot > currentPot)
+			{
+				gameFrame.blockRaiseButton(false);
+				gameFrame.blockYourBidField(false);
+			}
+		
+		}
+		
+		if((playerMoney == 0) && (playerPot == currentPot))
+		{
+			gameFrame.blockCheckButton(false);
+		}
+		
+		if((playerMoney == 0) && (playerPot < currentPot))
+		{
+			gameFrame.blockCheckButton(true);
+			
+			gameFrame.blockAllInButton(false);
+		}
+		
 	}
 
 	protected void check()
 	{
 		sendQueryToServer("Check");	
-		blockGameFrame();
+		blockGameFrame(true);
 	}
 	
 	protected void call()
@@ -270,7 +323,7 @@ public class Client{
 		
 		gameFrame.setYourMoney(String.valueOf(playerMoney));
 		sendQueryToServer("Call");
-		blockGameFrame();
+		blockGameFrame(true);
 	}
 	
 	protected void raise(int bid)
@@ -281,27 +334,39 @@ public class Client{
 		gameFrame.setYourMoney(String.valueOf(playerMoney));
 		gameFrame.setCurrentPot(bid);
 		sendQueryToServer("Raise "+bid);
-		blockGameFrame();
+		blockGameFrame(true);
 	}
 	
 	protected void fold()
 	{
 		sendQueryToServer("Fold");
-		blockGameFrame();
+		blockGameFrame(true);
 	}
 	
 	protected void allIn()
 	{
-		sendQueryToServer("All-in "+playerMoney);
+		
 		playerPot+=playerMoney;
+		
+		isAllIn = true;
+		
+		if(playerPot > currentPot)//>=?
+			gameFrame.setCurrentPot(playerPot);//?;
+		
+		sendQueryToServer("All-in change bank "+playerMoney);
+		sendQueryToServer("All-in "+playerPot);
+		
 		playerMoney = 0;
 		gameFrame.setYourMoney(String.valueOf(playerMoney));
-		blockGameFrame();
+		
+		blockGameFrame(true);
 	}
 	
-	protected void setAsDealer()
+	protected void setAsDealer(boolean b)
 	{
-		isDealer = true;
+		//isDealer = b;
+		//gameFrame.setAsDealer(b);
+		
 	}
 	
 	protected void setBlinds(int smallBlind)
@@ -326,6 +391,16 @@ public class Client{
 			out.println("-1");	
 	}
 	
+	protected void newGameStarted()  //maybe other name
+	{
+		isAllIn = false;
+	}
+	
+	protected void cardChangingStage() 
+	{
+		System.out.println("Player should change cards");//all system.out to status bar
+		gameFrame.blockChangeButton(false);
+	}
 	
 	/*_________________________________________________
 	 *             Frames part
@@ -338,19 +413,9 @@ public class Client{
 
 	protected void invokeGameFrame()
 	{
-		connectionFrame.dispose(); //test it
+		//connectionFrame.dispose();
 		gameFrame = new GameFrame2(this);
 		
-	}
-	
-	protected void blockGameFrame()
-	{
-		gameFrame.blockCallButton(true);
-		gameFrame.blockRaiseButton(true);
-		gameFrame.blockCheckButton(true);	
-		gameFrame.blockAllInButton(true);
-		gameFrame.blockFoldButton(true);
-		gameFrame.blockYourBidField(true);
 	}
 	
 	protected void blockGameFrame(boolean b)
