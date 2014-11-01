@@ -38,7 +38,7 @@ public class Game
 		informAllPlayers("Start cash "+money, false);
 		informAllPlayers("Small blind "+smallBlind, false);
 		chooseDealer();
-		Collections.swap(players, 0, dealerPosition);
+		//Collections.swap(players, 0, dealerPosition);
 		
 		startGame();
 	}
@@ -108,7 +108,9 @@ public class Game
 			{
 				try
 				{
+					System.out.println("Listen for player " +i);
 					listenForPlayer(leftPlayers.get(i));
+					//return;
 				}
 				catch (NullPointerException e)
 				{
@@ -161,6 +163,7 @@ public class Game
 		
 	}
 
+	@SuppressWarnings("resource")
 	private void listenForPlayer(Socket player)
 
 	{
@@ -193,11 +196,31 @@ public class Game
 				return;
 			}
 			
-			if(text.equals("Take cards"))
+			if(text.equals("Issue 4 cards"))
 			{
-				startCardsDistribution(out);
+				startCardsDistribution(out, 4);
 				return;
 			}
+			
+			if(text.startsWith("Take card back "))
+			{			
+				String color = String.valueOf(text.charAt(15));
+	        	String figure = text.substring(17);	
+	        	takeCardBack(color, figure);
+	        	/////////////////////////////
+			}
+			
+			if(text.equals("Issue one card"))
+			{
+				startCardsDistribution(out, 1);
+				//return;
+			}
+			if(text.equals("End of changing"))
+			{
+				System.out.println("Change end");
+				return;
+			}
+			
 			/*Add to client worker*/
 			if(text.equals("Small Blind"))
 			{
@@ -236,13 +259,22 @@ public class Game
 	        	currentPot = newPot;
 	        	return;
 	        }
+			
+			//making double analyzing for all in
+			if(text.startsWith("All-in change bank "))
+	        {
+	        	int sum = Integer.parseInt(text.substring(19));
+	        	bank+=sum;
+	        	listenForPlayer(player);//replace maybe
+	        	return;
+	        }
 			if(text.startsWith("All-in "))
 	        {
 	        	int sum = Integer.parseInt(text.substring(7));
 	        	
 	        	if(sum > currentPot)
 	        		currentPot = sum;
-	        	bank+=sum;
+
 	        	return;
 	        }
 			
@@ -269,7 +301,7 @@ public class Game
 			
 				try
 				{
-					pot = listenPlayerPot(leftPlayers.get(i));
+					pot = checkConcretePlayerPot(leftPlayers.get(i));
 					
 					if(pot.equals("-1"))					//especially for all in case
 						pot = String.valueOf(currentPot);
@@ -288,10 +320,10 @@ public class Game
 						
 				}
 				
-				System.out.println("Checking pot" +i);
-				System.out.println(leftPlayers.size());
-				System.out.println(currentPot);
-				System.out.println(pot);
+				System.out.println("Checking pot of player " +i);
+				//System.out.println(leftPlayers.size());
+				System.out.println("Current pot " +currentPot);
+				System.out.println("Player pot " +pot);
 				
 			if(currentPot != Integer.parseInt(pot))
 				return false;
@@ -299,7 +331,7 @@ public class Game
 		return true;
 	}
 	
-	private String listenPlayerPot(Socket player)
+	private String checkConcretePlayerPot(Socket player)
 	{
 		BufferedReader in = null;
 		try
@@ -326,6 +358,7 @@ public class Game
 			catch (IOException e)
 			{
 				System.out.println("No I/O while listening"); 
+				return text;
 			}
 		}
 		return text;
@@ -361,14 +394,15 @@ public class Game
 				
 				startAuctionRound();
 				informAllLeftPlayers("Change cards", true);
-				nullBank();
-				nullCurrentPot();//?
-				changeDealer();//?
+				
 				nextRound(); //just ++
 			}
 			
 			/*final stage*/
-			
+			//some function for final stage
+			//nullBank();
+			//nullCurrentPot();//?
+			//changeDealer();//?
 		}
 	}
 	
@@ -396,6 +430,8 @@ public class Game
 	/*should be more complicated*/
 	private void changeDealer()
 	{
+		informConcretePlayer("You are not dealer anymore", dealerPosition, false
+				);
 		dealerPosition = (++dealerPosition)%players.size();	//test it
 	}
 	
@@ -436,9 +472,9 @@ public class Game
 	}
 	
 	/*Maybe can be with integer parameter for changing cards also*/
-	private void startCardsDistribution(PrintWriter out)
+	private void startCardsDistribution(PrintWriter out, int amount)
 	{
-		for(int i=0; i < 4; i++)
+		for(int i=0; i < amount; i++)
 		{
 			String cardDescription = takeNewCard();
 			System.out.println("Card description: " +cardDescription); 
@@ -459,4 +495,9 @@ public class Game
 		return String.valueOf(randomCard.getCardColor())+ " " + String.valueOf(randomCard.getCardFigure());
 	}
 	
+	private void takeCardBack(String color, String figure)
+	{		
+		secondSuit.add(new Card(Integer.parseInt(color),Integer.parseInt(figure)));		
+		System.out.println("Card took back " +color + " " +figure);
+	}
 }

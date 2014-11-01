@@ -4,8 +4,8 @@ package badugi;
 
 public class Card 
 {
-	public int colour;
-	public int figure;
+	private int colour;
+	private int figure;
 	private boolean beenUsed;
 	
 	public Card(int colour, int figure)
