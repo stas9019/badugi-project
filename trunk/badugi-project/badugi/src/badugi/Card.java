@@ -2,35 +2,26 @@ package badugi;
 
 /*♥♦♣♠ ♡♢♧♤*/
 
-public class Card 
+public class Card // implements Comparable<Card>
 {
-	private int colour;
+	private int color;
 	private int figure;
-	private boolean beenUsed;
 	
 	public Card(int colour, int figure)
 	{
-		this.colour = colour;
+		this.color = colour;
 		this.figure = figure;
-		//System.out.println("New card "+colour+figure);
-		beenUsed = false;
 	}
 	
-	/*
-	 * set and get functions to card figure
-	 
-	public void setCardFigure(int cardFigure)
-	{
-		this.figure = cardFigure;
-	}
+
 
 	/*
-	 * set and get functions to card color
+	 * set and get functions to card color and figure
 	 */
 	 
 	public void setCardColor(int cardColor)
 	{
-		this.colour = cardColor;
+		this.color = cardColor;
 	}
 	public void setCardFigure(int cardFigure)
 	{
@@ -39,7 +30,7 @@ public class Card
 
 	public int getCardColor()
 	{
-		return colour;
+		return color;
 	}
 	
 	public int  getCardFigure()
@@ -47,13 +38,26 @@ public class Card
 		return figure;
 	}
 	
-	public void useCard()
-	{
-		beenUsed = true;
+	public String getCardFigureLexic()		//especially for sorting
+	{		
+		if(figure == 10)
+			return "B";
+		if(figure == 11)
+			return "C";
+		if(figure == 12)
+			return "D";
+		if(figure == 13)
+			return "E";
+		else
+			return "A"+ figure;
 	}
 	
-	public void returnCard()
+	 public String toString() {
+         return "color " + color + " " + " figure " + figure ;
+     }
+	/*@Override													//revision 30
+	public int compareTo(Card card)
 	{
-		beenUsed = false;
-	}
+		return String.valueOf(this.getCardColor()).compareTo(String.valueOf(card.getCardColor()));      
+	}*/
 }

@@ -1,11 +1,10 @@
 package Client;
 
-
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 import badugi.Card;
@@ -38,7 +37,8 @@ public class Client{
 	private int playerPot 	= 0;
 	
 	//private boolean isDealer = false;
-	private boolean isAllIn = false;	//for a new game make false again
+	private boolean isAllIn = false;	
+	private boolean isFold = false;		//revision 30
 	
 	private ConnectionFrame connectionFrame;
 	private GameFrame2 		gameFrame;
@@ -120,11 +120,13 @@ public class Client{
 	{
 		Card newCard = new Card(Integer.parseInt(color),Integer.parseInt(figure));
 		playerHand.add(newCard);
-		//prepareCardView(newCard);
+		//prepareCardView(newCard);				//revision 30
 		cardCounter++; /*maybe function check card counter*/
 		
 		if(cardCounter == 4)
 		{
+			//sort cards
+			sortCards();
 			for(int i=0; i<4; i++)
 				prepareCardView(playerHand.get(i), i);
 		}
@@ -181,18 +183,68 @@ public class Client{
 		gameFrame.setCardView(index, view);
 	}
 	
+	protected void cardChangingStage() 
+	{	
+		if(isFold)							//revision 30
+		{	
+			sendQueryToServer("I'm Fold");	//revision 30
+			return;						
+		}
+		
+		System.out.println("Player can change cards");//all system.out to status bar
+		gameFrame.blockCheckBoxes(false);
+		gameFrame.blockChangeButton(false);
+	}
+	
 	protected void changeCards(int index)
 	{
-		//return card
 		sendQueryToServer("Take card back "+playerHand.get(index).getCardColor() +" " + playerHand.get(index).getCardFigure());
 		
 		playerHand.remove(index);
 		cardCounter--;
 		
 		sendQueryToServer("Issue one card");
-		//take new card query
 	}
 	
+	protected void sortCards()										// revision 30
+	{
+		//Collections.swap(players, 0, dealerPosition);
+		
+		 /*for (Card card : playerHand) 	//example of making cycle
+	     {				
+	     	System.out.println(card);
+	     }*/
+		
+		 System.out.println("Order cards by figure");
+		 
+		 Collections.sort(playerHand, new Comparator<Card>() {
+	            @Override
+	            public int compare(Card o1, Card o2) {
+	                return o1.getCardFigureLexic().compareTo(o2.getCardFigureLexic());		//cause cannot compare by primitive type int
+	            }
+	        });
+
+	        for (Card card : playerHand) 	//example of making cycle
+	        {				
+	            System.out.println(card);
+	        }
+		 
+		System.out.println("Order cards by color");
+		
+		Collections.sort(playerHand, new Comparator<Card>() {								
+            @Override
+            public int compare(Card o1, Card o2) {
+                return String.valueOf(o1.getCardColor()).compareTo(String.valueOf(o2.getCardColor()));		//cause cannot compare by primitive type int
+            }
+        });
+		
+		 /*for (Card card : playerHand) 	//example of making cycle
+	     {				
+			 System.out.println(card);
+	     }*/
+		 
+		
+	}
 	/*_________________________________________________
 	 *             Game process part
 	 *_________________________________________________*/
@@ -206,6 +258,7 @@ public class Client{
 			playerPot+=smallBlind;
 			gameFrame.setYourMoney(playerMoney +"");
 			gameFrame.setCurrentPot(bigBlind);
+			gameFrame.setYourPot(playerPot);
 			sendQueryToServer("Small Blind");
 		}
 		else
@@ -219,6 +272,7 @@ public class Client{
 			playerMoney-=bigBlind;
 			playerPot+=bigBlind;
 			gameFrame.setYourMoney(playerMoney +""); //always show changes
+			gameFrame.setYourPot(playerPot);
 			gameFrame.setCurrentPot(bigBlind);
 			sendQueryToServer("Big Blind");
 		}
@@ -232,7 +286,15 @@ public class Client{
 		gameFrame.setCurrentPot(pot);
 		
 		if(isAllIn)
+		{
 			sendQueryToServer("Check");	
+			return;							//revision 30
+		}
+		if(isFold)							//revision 30
+		{	
+			sendQueryToServer("I'm Fold");
+			return;						
+		}
 		
 		if(playerMoney < currentPot)
 		{
@@ -321,7 +383,10 @@ public class Client{
 		playerMoney+=playerPot;		
 		playerPot=currentPot;
 		
+		gameFrame.setYourPot(playerPot);
+		gameFrame.setCurrentPot(currentPot);					//revision 30
 		gameFrame.setYourMoney(String.valueOf(playerMoney));
+		
 		sendQueryToServer("Call");
 		blockGameFrame(true);
 	}
@@ -331,7 +396,9 @@ public class Client{
 		playerMoney+=playerPot;
 		playerMoney-=bid;		
 		playerPot=bid;
+		
 		gameFrame.setYourMoney(String.valueOf(playerMoney));
+		gameFrame.setYourPot(playerPot);
 		gameFrame.setCurrentPot(bid);
 		sendQueryToServer("Raise "+bid);
 		blockGameFrame(true);
@@ -340,6 +407,18 @@ public class Client{
 	protected void fold()
 	{
 		sendQueryToServer("Fold");
+		
+		for(int i=3; i>=0; i--)			// revision 30
+		{
+			sendQueryToServer("Take card back "+playerHand.get(i).getCardColor() +" " + playerHand.get(i).getCardFigure());		
+			playerHand.remove(i);
+			cardCounter--;
+			
+			gameFrame.setCardView(i, "");
+		}
+		sendQueryToServer("End of returning");// revision 30
+		
+		isFold = true;
 		blockGameFrame(true);
 	}
 	
@@ -357,6 +436,7 @@ public class Client{
 		sendQueryToServer("All-in "+playerPot);
 		
 		playerMoney = 0;
+		gameFrame.setYourPot(playerPot);
 		gameFrame.setYourMoney(String.valueOf(playerMoney));
 		
 		blockGameFrame(true);
@@ -385,7 +465,7 @@ public class Client{
 	
 	protected void checkPot()
 	{
-		if(playerMoney != 0)
+		if(!isAllIn && !isFold)//was before(playerMoney != 0)
 			out.println(String.valueOf(playerPot));
 		else
 			out.println("-1");	
@@ -394,13 +474,24 @@ public class Client{
 	protected void newGameStarted()  //maybe other name
 	{
 		isAllIn = false;
+		isFold = false;
+		playerPot = 0;
+		cardCounter = 0;
+		
+		playerHand.clear();		//revision 30
+		for(int i=3; i>=0; i--)			// revision 30   
+		{
+			//playerHand.remove(i);
+			gameFrame.setCardView(i, "");
+		}
+		
+		gameFrame.setYourPot(0);
+		gameFrame.blockCheckBoxes(true);
+		
+		sendQueryToServer("Issue 4 cards");
 	}
 	
-	protected void cardChangingStage() 
-	{
-		System.out.println("Player should change cards");//all system.out to status bar
-		gameFrame.blockChangeButton(false);
-	}
+	
 	
 	/*_________________________________________________
 	 *             Frames part
