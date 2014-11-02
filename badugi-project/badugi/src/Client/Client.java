@@ -1,5 +1,6 @@
 package Client;
 
+import java.awt.Color;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -135,17 +136,17 @@ public class Client{
 	private void prepareCardView(Card card, int index)
 	{
 		String view="";
-		
+		Color color = null;
 		switch(card.getCardColor())
 		{/*♥♦♣♠ ♡♢♧♤*/
 			case 1:
-				view="♥";break;
+				view="♥";color=Color.RED;break;
 			case 2:
-				view="♦";break;
+				view="♦";color=Color.RED;break;
 			case 3:
-				view="♣";break;
+				view="♣";color=Color.BLACK;break;
 			case 4:
-				view="♠";break;
+				view="♠";color=Color.BLACK;break;
 		}
 		
 		view+=" ";
@@ -180,7 +181,7 @@ public class Client{
 				view+="K";break;	
 		}
 		
-		gameFrame.setCardView(index, view);
+		gameFrame.setCardView(index, view, color);
 	}
 	
 	protected void cardChangingStage() 
@@ -414,7 +415,7 @@ public class Client{
 			playerHand.remove(i);
 			cardCounter--;
 			
-			gameFrame.setCardView(i, "");
+			gameFrame.setCardView(i, "", null);
 		}
 		sendQueryToServer("End of returning");// revision 30
 		
@@ -482,7 +483,7 @@ public class Client{
 		for(int i=3; i>=0; i--)			// revision 30   
 		{
 			//playerHand.remove(i);
-			gameFrame.setCardView(i, "");
+			gameFrame.setCardView(i, "", null);
 		}
 		
 		gameFrame.setYourPot(0);
