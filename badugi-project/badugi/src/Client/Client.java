@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 
-import badugi.Card;
+//import badugi.Card;	revision 32
 
 /*
  * This is client's Logic Layer
@@ -31,7 +31,7 @@ public class Client{
 	
 	
 	private int playerMoney = 0;
-	private int cardCounter = 0;
+	private int cardCounter = 0; 			
 	private int smallBlind 	= 0;
 	private int bigBlind 	= 0;
 	private int currentPot 	= 0;
@@ -106,7 +106,7 @@ public class Client{
 	 *_________________________________________________*/
 	
 	
-	protected void initializeSuit()
+	/*protected void initializeSuit()           //revision 32
 	{
 		for(int i=1; i<=4; i++)
 		{
@@ -115,19 +115,20 @@ public class Client{
 				suit.add(new Card(i,j));
 			}
 		}
-	}
+	}*/
 	
 	protected void takeNewCard(String color, String figure)
 	{
 		Card newCard = new Card(Integer.parseInt(color),Integer.parseInt(figure));
 		playerHand.add(newCard);
 		//prepareCardView(newCard);				//revision 30
-		cardCounter++; /*maybe function check card counter*/
+		//cardCounter++; //revision 32
 		
-		if(cardCounter == 4)
+		if(playerHand.size() == 4)	//revision 32
 		{
 			//sort cards
-			sortCards();
+			sortCardsByFigure();		
+			sortCardsByColor();
 			for(int i=0; i<4; i++)
 				prepareCardView(playerHand.get(i), i);
 		}
@@ -202,49 +203,53 @@ public class Client{
 		sendQueryToServer("Take card back "+playerHand.get(index).getCardColor() +" " + playerHand.get(index).getCardFigure());
 		
 		playerHand.remove(index);
-		cardCounter--;
+		//cardCounter--;		//revision 32
 		
 		sendQueryToServer("Issue one card");
 	}
-	
-	protected void sortCards()										// revision 30
+	protected void sortCardsByColor()										// revision 32
 	{
-		//Collections.swap(players, 0, dealerPosition);
-		
-		 /*for (Card card : playerHand) 	//example of making cycle
-	     {				
-	     	System.out.println(card);
-	     }*/
-		
-		 System.out.println("Order cards by figure");
-		 
-		 Collections.sort(playerHand, new Comparator<Card>() {
-	            @Override
-	            public int compare(Card o1, Card o2) {
-	                return o1.getCardFigureLexic().compareTo(o2.getCardFigureLexic());		//cause cannot compare by primitive type int
-	            }
-	        });
-
-	        for (Card card : playerHand) 	//example of making cycle
-	        {				
-	            System.out.println(card);
-	        }
-		 
 		System.out.println("Order cards by color");
 		
 		Collections.sort(playerHand, new Comparator<Card>() {								
             @Override
             public int compare(Card o1, Card o2) {
-                return String.valueOf(o1.getCardColor()).compareTo(String.valueOf(o2.getCardColor()));		//cause cannot compare by primitive type int
+                return String.valueOf(o1.getCardColor()).compareTo(String.valueOf(o2.getCardColor()));		//cause cannot compare by primitive type integer
             }
         });
+	}
+	
+	protected void sortCardsByFigure()										// revision 32
+	{
 		
-		 /*for (Card card : playerHand) 	//example of making cycle
-	     {				
-			 System.out.println(card);
-	     }*/
+		 System.out.println("Order cards by figure");
 		 
-		
+		 Collections.sort(playerHand, new Comparator<Card>() 
+				 {
+		            @Override
+		            public int compare(Card o1, Card o2) 
+		            {
+		                return o1.getCardFigureLexic().compareTo(o2.getCardFigureLexic());		//cause cannot compare by primitive type integer
+		            }
+				 });
+	}
+	
+	protected void clearCardView()
+	{
+		for(int i = 0; i<4; i++)
+			gameFrame.setCardView(i, "", null);
+	}
+
+	protected void removeMarkedCards()//revision 32
+	{
+		for(int i=playerHand.size()-1; i>=0; i--)			// delete marked  
+		{
+			if(playerHand.get(i).isMarked())
+			{
+				playerHand.remove(i);
+			    //gameFrame.setCardView(i, "", null);
+			}
+		}
 	}
 	/*_________________________________________________
 	 *             Game process part
@@ -380,6 +385,8 @@ public class Client{
 	
 	protected void call()
 	{
+		sendQueryToServer("Call "+(currentPot - playerPot));	//revision 32
+		
 		playerMoney-=currentPot;
 		playerMoney+=playerPot;		
 		playerPot=currentPot;
@@ -388,7 +395,6 @@ public class Client{
 		gameFrame.setCurrentPot(currentPot);					//revision 30
 		gameFrame.setYourMoney(String.valueOf(playerMoney));
 		
-		sendQueryToServer("Call");
 		blockGameFrame(true);
 	}
 	
@@ -413,7 +419,7 @@ public class Client{
 		{
 			sendQueryToServer("Take card back "+playerHand.get(i).getCardColor() +" " + playerHand.get(i).getCardFigure());		
 			playerHand.remove(i);
-			cardCounter--;
+			//cardCounter--;		//revision 32
 			
 			gameFrame.setCardView(i, "", null);
 		}
@@ -467,17 +473,165 @@ public class Client{
 	protected void checkPot()
 	{
 		if(!isAllIn && !isFold)//was before(playerMoney != 0)
-			out.println(String.valueOf(playerPot));
+			sendQueryToServer(String.valueOf(playerPot));
 		else
-			out.println("-1");	
+			sendQueryToServer("-1");	
 	}
+	
+	protected void getBank(int bank)
+	{
+		playerMoney += bank;
+	}
+	
+	protected int countMatchingColorsByColor(int color)	//revision 32
+	{
+		int unUniqueColors = 0;
+		for(int i=0; i<3; i++)
+		{
+			if(playerHand.get(i).getCardColor() == color)
+				unUniqueColors++;				
+		}
+		return unUniqueColors;
+	}
+	
+	protected void answerHowMuchColors()	//revision 32
+	{
+		sortCardsByFigure();
+		
+		for(int i=0; i<3; i++)	//find matching figures, mark less useful, after delete marked
+		{
+			if(playerHand.get(i).getCardFigure() == playerHand.get(i+1).getCardFigure())
+			{
+				if( countMatchingColorsByColor(playerHand.get(i).getCardColor()) >= countMatchingColorsByColor(playerHand.get(i+1).getCardColor()) ) 	
+				{
+					playerHand.get(i).markCard();
+				}
+				else
+				{
+					playerHand.get(i+1).markCard();
+				}
+			}
+		}
+		System.out.println("Size before first removing "+playerHand.size());
+		removeMarkedCards();		// delete marked  
+		System.out.println("Size after first removing "+playerHand.size());
+		
+		clearCardView();
+		sortCardsByFigure();
+		sortCardsByColor();
+		
+		for(int i=0; i<playerHand.size(); i++)
+			prepareCardView(playerHand.get(i), i);
+		
+		int uniqueColors = 1;// was 0
+		
+		for(int i=0; i<playerHand.size()-1; i++)	
+		{
+			if(playerHand.get(i).getCardColor() != playerHand.get(i+1).getCardColor())
+				uniqueColors++;				
+		}
+		System.out.println("Unique colors "+uniqueColors);
+	
+		/*now, if some cards have same color, leave lowest card, remove others*/
+		
+		
+			/*just pair of the same colors */
+				/*3 colors - 4 cards*/
+				/*2 colors - 3 cards*/
+				/*1 color - 2 cards*/
+		if(uniqueColors == playerHand.size()-1)		
+		{	
+			for(int i=0; i<playerHand.size()-1; i++)
+			{
+				if(playerHand.get(i).getCardColor() == playerHand.get(i+1).getCardColor())
+				{
+						playerHand.get(i+1).markCard();//we know, that highest card is next
+				}
+					
+			}
+		}
+		
+		//removeMarkedCards(); ????
+		
+		/*triple of the same colors*/						
+			/*2 colors - 4cards, also can be two pairs*/
+			/*1 color - 3cards*/
+		if(uniqueColors == playerHand.size()-2)		
+		{	
+			/*is it case of two pairs?*/
+			if(playerHand.size()>3)		// two if's to make code more readable was!=
+			{
+					if(playerHand.get(1).getCardColor() != playerHand.get(2).getCardColor())//only in this case cards colors are not the same
+					{
+						playerHand.remove(3);
+						playerHand.remove(1);
+					}
+			}
+				if(playerHand.size() >= 3) // it means, that two cards were removed before//corrected  was <
+				{
+					for(int i=0; i<=1; i++)
+					{
+						if(playerHand.get(i).getCardColor() == playerHand.get(i+1).getCardColor())
+						{
+								playerHand.get(i+1).markCard();
+								if(playerHand.get(i+1).getCardColor() == playerHand.get(i+2).getCardColor())
+								{
+									playerHand.get(i+2).markCard();
+									break;
+								}
+						}
+							
+					}
+				}
+			
+		}
+		
+		//removeMarkedCards();	// if two cards were removed, no marked cards
+		
+		/*four cards of the same colors*/										
+		if(uniqueColors == playerHand.size()-3)		//is some card have same color, leave lowest 			revision 32
+		{		
+			playerHand.remove(3);
+			playerHand.remove(2);
+			playerHand.remove(1);
+		}
+		
+		removeMarkedCards();	// delete marked again
+		
+		
+		
+		sortCardsByFigure();
+		/*refresh all cards view
+		 * cards will be shown from lowest card to highest
+		 */
+		clearCardView();
+		
+		for(int i=0; i<playerHand.size(); i++)
+			prepareCardView(playerHand.get(i), i);
+		
+		cardCounter = playerHand.size();
+
+		
+			sendQueryToServer("My colors "+uniqueColors);	
+		
+	}
+
+	protected void showNextHighestFigure()//revision 32
+	{
+		cardCounter--;
+		if(cardCounter >= 0)
+			sendQueryToServer("My next highest figure "+playerHand.get(cardCounter).getCardFigure());
+		else
+			sendQueryToServer("No more cards left");
+	}
+	
 	
 	protected void newGameStarted()  //maybe other name
 	{
 		isAllIn = false;
 		isFold = false;
 		playerPot = 0;
-		cardCounter = 0;
+		cardCounter = 0;		//revision 32
 		
 		playerHand.clear();		//revision 30
 		for(int i=3; i>=0; i--)			// revision 30   
@@ -492,7 +646,20 @@ public class Client{
 		sendQueryToServer("Issue 4 cards");
 	}
 	
+	protected void newGame()	//revision 32
+	{
+		gameFrame.blockReadyButton(false);
+	}
 	
+	protected void gameOver()		//revision 32 //maybe for victory and loss  also
+	{
+		for(int i=3; i>=0; i--)			
+		{	
+			gameFrame.setCardView(i, "", null);
+			gameFrame.setCurrentPot(0);
+			blockGameFrame(true);
+		}
+	}
 	
 	/*_________________________________________________
 	 *             Frames part

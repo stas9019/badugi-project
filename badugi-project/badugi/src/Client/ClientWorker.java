@@ -98,7 +98,15 @@ public class ClientWorker implements Runnable
 		        	connectionFrame.setVisible(false);
 		        	
 		        	client.invokeGameFrame();
-		        	client.initializeSuit();	        	
+		        	//client.initializeSuit();	    revision 32    	
+		        }
+		        
+		        if(text.equals("New game"))
+		        {
+		        	//connectionFrame.setVisible(false);
+		        	
+		        	client.newGame();
+		        	//client.initializeSuit();	    revision 32    	
 		        }
 		        
 		        if(text.startsWith("Start cash "))
@@ -131,7 +139,24 @@ public class ClientWorker implements Runnable
 		        {
 		        	client.newGameStarted();	
 		        }
+		     
+		        if(text.equals("You are winner!"))		//revision 32
+		        {
+		        	//show in status text
+		        	client.gameOver();	
+		        }
+
+		        if(text.equals("Show your next highest figure"))		//revision 32
+		        {
+		        	//show in status text
+		        	client.showNextHighestFigure();	
+		        }
 		        
+		        if(text.equals("How many different colors do you have?"))		//revision 32
+		        {
+		        	//show in status text
+		        	client.answerHowMuchColors();	
+		        }
 		        //!!!   Format is like "New card x y" where x - card color, y - card figure
 		        if(text.startsWith("New card"))
 		        {
@@ -165,6 +190,14 @@ public class ClientWorker implements Runnable
 		        {
 		        	client.cardChangingStage();
 		        }
+		        
+		        if(text.startsWith("Your won! "))		//revision 32
+		        {
+		        	int bank = Integer.parseInt(text.substring(10));
+		        	client.getBank(bank);
+		        }
+		        
+		        
 		       
 			}      
     }
