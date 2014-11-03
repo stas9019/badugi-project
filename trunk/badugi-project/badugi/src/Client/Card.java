@@ -1,4 +1,4 @@
-package badugi;
+package Client;
 
 /*♥♦♣♠ ♡♢♧♤*/
 
@@ -20,9 +20,10 @@ public class Card // implements Comparable<Card>
 		marked = true;
 	}
 	
-	protected void isMarked()
+	protected boolean isMarked()
 	{
-		marked = false;
+		return marked;
+		
 	}
 	/*
 	 * set and get functions to card color and figure

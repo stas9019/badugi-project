@@ -33,7 +33,7 @@ public class GameFrame2 extends JFrame implements ActionListener
 	 */
 	private static final long serialVersionUID = -2977435916670193465L;
 	private Client client;
-	private JButton bConfirm, bBet, bCall, bRaise, bAllIn, bCheck, bFold, bChange;
+	private JButton bReady, bBet, bCall, bRaise, bAllIn, bCheck, bFold, bChange;
 	private JLabel lMoney, lCurrPot, lPot;
 	private JButton cards[] = new JButton[4];
 	private JCheckBox boxes[] = new JCheckBox[4];
@@ -80,12 +80,12 @@ public class GameFrame2 extends JFrame implements ActionListener
 		tBid.setEnabled(false);
 		add(tBid);
 		
-		bConfirm = new JButton("Confirm");
-		bConfirm.setBounds(550, 285, 100, 20);
-		bConfirm.setEnabled(false);
-		bConfirm.addActionListener(this);
-		bConfirm.setEnabled(false);
-		add(bConfirm);
+		bReady = new JButton("Ready");				//revision 32
+		bReady.setBounds(550, 285, 100, 20);
+		bReady.setEnabled(false);
+		bReady.addActionListener(this);
+		bReady.setEnabled(false);
+		add(bReady);
 		
 		bBet = new JButton("Bet");
 		bBet.setBounds(25, 310, 100, 40);
@@ -124,7 +124,7 @@ public class GameFrame2 extends JFrame implements ActionListener
 		add(bFold);
 		
 		for(int i = 0; i < 4 ;i++) {
-			cards[i] = new JButton("Card" +i);
+			cards[i] = new JButton();
 			cards[i].setBounds(150+(i*95), 140, 90, 130);
 			add(cards[i]);
 		}
@@ -157,6 +157,11 @@ public class GameFrame2 extends JFrame implements ActionListener
 		bCall.setEnabled(!b);
 	}
 	
+	protected void blockReadyButton(boolean b)		//revision 32
+	{
+		bReady.setEnabled(!b);
+	}
+
 	protected void blockRaiseButton(boolean b)
 	{
 		bRaise.setEnabled(!b);
@@ -186,7 +191,6 @@ public class GameFrame2 extends JFrame implements ActionListener
 	{
 		
 		tBid.setEnabled(!b);
-		//bConfirm.setEnabled(!b);
 		
 		if(b)
 		{
@@ -276,6 +280,12 @@ public class GameFrame2 extends JFrame implements ActionListener
 		if(event.getSource() == bCheck)
 		{
 			client.check();
+		}
+		
+		if(event.getSource() == bReady)
+		{
+			client.sendQueryToServer("Ready");
+			bReady.setEnabled(false);
 		}
 		
 		if(event.getSource() == bFold)
