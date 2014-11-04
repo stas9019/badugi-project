@@ -33,8 +33,9 @@ public class GameFrame2 extends JFrame implements ActionListener
 	 */
 	private static final long serialVersionUID = -2977435916670193465L;
 	private Client client;
-	private JButton bReady, bBet, bCall, bRaise, bAllIn, bCheck, bFold, bChange;
+	private JButton bReady, bDealer, bCall, bRaise, bAllIn, bCheck, bFold, bChange;
 	private JLabel lMoney, lCurrPot, lPot;
+	private static JLabel lStatusBar;
 	private JButton cards[] = new JButton[4];
 	private JCheckBox boxes[] = new JCheckBox[4];
 	private JTextField tBid;
@@ -57,6 +58,12 @@ public class GameFrame2 extends JFrame implements ActionListener
 			e.printStackTrace();
 		}
 
+		lStatusBar = new JLabel();
+		lStatusBar.setBounds(200, 0, 330, 20);				//revision 33	maybe bottom position will be better
+		lStatusBar.setBackground(new Color(250,250,250));
+		lStatusBar.setOpaque(true);		
+		add(lStatusBar);
+		
 		lMoney = new JLabel("  Your money: ");
 		lMoney.setBounds(25, 85, 205, 20);				//revision 30
 		lMoney.setBackground(new Color(250,250,250));
@@ -87,11 +94,13 @@ public class GameFrame2 extends JFrame implements ActionListener
 		bReady.setEnabled(false);
 		add(bReady);
 		
-		bBet = new JButton("Bet");
-		bBet.setBounds(25, 310, 100, 40);
-		bBet.addActionListener(this);
-		bBet.setEnabled(false);
-		add(bBet);
+		bDealer = new JButton();
+		bDealer.setBounds(25, 310, 100, 40);
+		bDealer.addActionListener(this);
+		bDealer.setEnabled(false);
+		bDealer.setFont(new Font(null, Font.PLAIN, 20));
+		bDealer.setForeground(Color.RED);
+		add(bDealer);
 		
 		bCall = new JButton("Call");
 		bCall.setBounds(130, 310, 100, 40);
@@ -207,13 +216,18 @@ public class GameFrame2 extends JFrame implements ActionListener
 		for(int i=3; i>=0; i--)
 			boxes[i].setEnabled(!b);
 	}
+	
+	
 	/*_________________________________________________
 	 *            Set/get functions part
 	 *_________________________________________________*/
 	
-	//set player pot function
+	protected static void setGameStatus(String status)		//revision 33
+	{
+		lStatusBar.setText(status);
+	}
 	
-	protected void setYourMoney(String playerMoney)
+ 	protected void setYourMoney(String playerMoney)
 	{
 		lMoney.setText("  Your money: " + playerMoney);
 	}
@@ -233,6 +247,20 @@ public class GameFrame2 extends JFrame implements ActionListener
 	protected void setYourPot(int playerMoney)
 	{
 		lPot.setText("  Your pot: " + playerMoney);
+	}
+	
+	protected void setAsDealer(boolean b)
+	{
+		if(b)
+		{
+			bDealer.setText("Dealer");
+			bDealer.setEnabled(b);
+		}
+		else
+		{
+			bDealer.setText("");
+			bDealer.setEnabled(b);
+		}
 	}
 	
 	protected int getYourBid()

@@ -11,6 +11,10 @@ import javax.swing.JTextField;
 
 public class ConnectionFrame extends JFrame implements ActionListener
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JLabel lAdress, lPort, lOutput;
 	private JTextField tAdress, tPort;
 	private JButton bConnect;

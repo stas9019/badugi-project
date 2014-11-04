@@ -11,16 +11,31 @@ import java.util.Random;
 
 public class Game
 {
-	//private int round; removed //revision 30
-	private int bank, smallBlind, bigBlind, currentPot;//money removed //revision 30
+	
+	private int bank;
+	private int smallBlind;
+	private int bigBlind;
+	private int currentPot;
 	private int dealerPosition;
+	private int playerPot;
+	private int allInWinnerPot;
+	
+	private boolean winnerIsAllIn;			//revision 33
 	private boolean endOfCheckingCards;		//revision 32
-	private ArrayList<Socket> players;
-	private ArrayList<Socket> leftPlayers;
+	
+	private String winnerCombination;
+	
 	private int playerColor[];
 	private int playerFigure[];
+	
+	private ArrayList<Socket> players;
+	private ArrayList<Socket> leftPlayers;
+	
 	private ArrayList<Card> suit = new ArrayList<Card>();
 	private ArrayList<Card> secondSuit = new ArrayList<Card>();
+	
+
+
 	public Random random = new Random();
 	
 	
@@ -31,11 +46,8 @@ public class Game
 		this.smallBlind = smallBlind;
 		bigBlind=2*smallBlind;
 		
-		leftPlayers = new ArrayList<Socket>(players);			// is necessary? revision 30
-		
-		
-		//initializeSuit();					//revision 30
-		
+		leftPlayers = new ArrayList<Socket>(players);	
+
 		informAllPlayers("Game starts!", false);
 		informAllPlayers("Start cash "+money, false);
 		informAllPlayers("Small blind "+smallBlind, false);
@@ -144,7 +156,7 @@ public class Game
 		PrintWriter out = null;
 		try
 		{
-			out = new PrintWriter(players.get(playerNum).getOutputStream(), true);
+				out = new PrintWriter(players.get(playerNum).getOutputStream(), true);
 			
 			System.out.println("Informing concrete Player "+playerNum +": "+ phrase);			
 			out.println(phrase);	
@@ -161,21 +173,36 @@ public class Game
 		catch (NullPointerException e)
 		{
 			playerDisconected(playerNum);				// revision 30
-			/*
-			System.out.println("Player "+playerNum +" disconected");
-			players.remove(playerNum);
-			leftPlayers.remove(playerNum);
-			
-			if(players.size() < 2)
-			{
-				System.out.println("Game over - just one player remain");
-				System.exit(-1);		
-			}
-			*/
 		}		
 		
 	}
 
+	private void informConcreteLeftPlayer(String phrase, int playerNum, boolean waitForAnswer )			//revision 33
+	{
+		PrintWriter out = null;
+		try
+		{
+				out = new PrintWriter(leftPlayers.get(playerNum).getOutputStream(), true);
+			
+			System.out.println("Informing concrete Player "+playerNum +": "+ phrase);			
+			out.println(phrase);	
+			
+			if(waitForAnswer)
+			{
+				listenForPlayer(leftPlayers.get(playerNum));
+			}
+		} 
+		catch (IOException e)
+		{
+			System.out.println("I/O Exception");
+		}
+		catch (NullPointerException e)
+		{
+			playerDisconected(playerNum);				// revision 30
+		}		
+		
+	}
+	
 	private void listenForPlayer(Socket player)
 	{
 		BufferedReader in = null;
@@ -282,9 +309,15 @@ public class Game
 			if(text.startsWith("Raise "))
 	        {
 	        	int newPot = Integer.parseInt(text.substring(6));
-	        	bank+=currentPot;
-	        	bank-=newPot;
 	        	currentPot = newPot;
+	        	//return;
+	        }
+			
+			if(text.startsWith("Difference Raise "))
+	        {
+	        	int diff = Integer.parseInt(text.substring(17));
+	        	bank+=diff;
+
 	        	return;
 	        }
 			
@@ -293,15 +326,15 @@ public class Game
 	        {
 	        	int sum = Integer.parseInt(text.substring(19));
 	        	bank+=sum;
-	        	listenForPlayer(player);//replace maybe
-	        	return;
+	        	//listenForPlayer(player);//replace maybe	//revision 33
+	        	//return;
 	        }
-			if(text.startsWith("All-in "))
+			if(text.startsWith("I'm All-in "))
 	        {
-	        	int sum = Integer.parseInt(text.substring(7));
+	        	int pot = Integer.parseInt(text.substring(11));
 	        	
-	        	if(sum > currentPot)
-	        		currentPot = sum;
+	        	if(pot > currentPot)
+	        		currentPot = pot;
 
 	        	return;
 	        }
@@ -326,6 +359,30 @@ public class Game
 				endOfCheckingCards = true;	        	
 	        	return;
 	        }
+			
+			if(text.startsWith("Yes, I'm All-in "))		//revision 32
+	        {	
+				winnerIsAllIn = true;
+				allInWinnerPot = Integer.parseInt(text.substring(16));
+	        	return;
+	        }
+			if(text.equals("I'm not All-in"))		//revision 32
+	        {		        	
+	        	return;
+	        }
+			
+			if(text.startsWith("Real pot "))		//revision 32
+	        {	
+				playerPot = Integer.parseInt(text.substring(9));
+	        	return;
+	        }
+			
+			if(text.startsWith("Winner combination "))		//revision 32
+	        {	
+				winnerCombination = text.substring(19);
+	        	return;
+	        }
+			
 		}
 	}
 
@@ -413,7 +470,8 @@ public class Game
 		return text;
 	}
 	
-	private void playerDisconected(int playerNum)				//revision 30
+	
+	private void playerDisconected(int playerNum)			
 	{
 		System.out.println("Player "+playerNum +" disconected");
 		players.remove(playerNum);
@@ -436,11 +494,13 @@ public class Game
 		while(players.size()>1)
 		{			
 			/*null/false/clear all variables and arrays*/
+			winnerCombination = "";
 			playerColor = null;
 			playerFigure = null;
 			endOfCheckingCards = false;		//revision 32
+			winnerIsAllIn = false;			//revision 33
 			secondSuit.clear();				//revision 32
-			
+			leftPlayers.clear();
 			
 			if(players.size() < 2)
 			{
@@ -448,9 +508,11 @@ public class Game
 				break;
 			}
 			
-			leftPlayers = new ArrayList<Socket>(players);
+			leftPlayers = new ArrayList<Socket>(players);//makes just reference, not copy, but makes the same size to make a copy in next step
+			Collections.copy(leftPlayers, players);	//revision 33
 			
-			initializeSuit();						//revision 30
+			
+			initializeSuit();					
 			informAllPlayers("New game", true);
 			
 			informAllPlayers("First card distribution", true);
@@ -477,7 +539,7 @@ public class Game
 					break;
 				}
 				
-				if(i!=4)											//no card changing after first round
+				if(i!=4)											//no card changing after four round
 					informAllLeftPlayers("Change cards", true);
 				
 			}
@@ -485,8 +547,8 @@ public class Game
 			/*final stage*/
 			finalStage();	// find a winner and give him bank
 			nullBank();
-			nullCurrentPot();//?
-			changeDealer();//?
+			nullCurrentPot();
+			changeDealer();
 		}
 	}
 	
@@ -498,7 +560,7 @@ public class Game
 		{
 			for(int i = 1; i <= leftPlayers.size(); i++)
 			{
-				informConcretePlayer("Auction "+currentPot, (dealerPosition+2 + i)%leftPlayers.size(), true);
+				informConcreteLeftPlayer("Auction "+currentPot, (dealerPosition+2 + i)%leftPlayers.size(), true);
 			}
 			equality = checkPotsOfAllLeftPlayers();
 		}
@@ -509,11 +571,10 @@ public class Game
 		dealerPosition = new Random().nextInt(players.size());
 	}
 	
-	/*should be more complicated*/
 	private void changeDealer()
 	{
 		informConcretePlayer("You are not dealer anymore", dealerPosition, false);
-		dealerPosition = (++dealerPosition)%players.size();	//test it
+		dealerPosition = (dealerPosition+1)%players.size();							//revision 33 
 	}
 	
 	private void nullBank()		//just for easier understanding
@@ -521,12 +582,33 @@ public class Game
 		bank = 0;
 	}
 	
-	private void informWinner()	//just prototype revision 32   
+	private void informWinner()	//revision 33
 	{
-		if(leftPlayers.size() < 2)								//check if player not All-In
-			informConcretePlayer("Your won! "+bank, 0, false);
+			
+			informConcreteLeftPlayer("Are you All-In?", 0, true);
+			if(winnerIsAllIn)										//should be tested
+			{
+				for(int i = 0; i < players.size(); i++)
+				{
+					informConcretePlayer("Your real pot?", i, true);
+					if(allInWinnerPot < playerPot)
+						informConcretePlayer("Take back "+(playerPot - allInWinnerPot), i, false);
+					
+					bank-=(playerPot - allInWinnerPot);
+				}
+			}
+			informConcreteLeftPlayer("Your won! "+bank, 0, false);
+			
+			showWinnersCardsForAllPlayers();
+
 	}
 	
+	private void informPlayersAboutDraw()
+	{									// if more than one player remained	
+			informAllLeftPlayers("Draw, casino took your money :P", false);
+			nullBank();
+	}
+		
 	private void nullCurrentPot()
 	{
 		currentPot = 0;
@@ -539,71 +621,41 @@ public class Game
 
 		for(int i = 0; i < leftPlayers.size(); i++)
 		{
-			informConcretePlayer("How many different colors do you have?", i, true);
+			informConcreteLeftPlayer("How many different colors do you have?", i, true);
 		}
 
 		int max = 0;
-		for(int i = 0; i < leftPlayers.size(); i++)		//find max
+		for(int i = 0; i < leftPlayers.size(); i++)		//find max amount of different colors on players hands 
 		{
 			if(playerColor[i] > max)
 				max = playerColor[i];
 		}
-		for(int i = leftPlayers.size()-1; i>=0; i--)	//staying players with max unique colors
+		for(int i = leftPlayers.size()-1; i>=0; i--)	//leave players with max unique colors
 		{
 			if(playerColor[i] < max)
 				leftPlayers.remove(i);
 		}
+		
 		if(leftPlayers.size() < 2)				// if just one player remain
 		{
 			informWinner();
 			return;
 		}
 		//else, checking players hands
-		checkLeftPlayersCards();
+		checkLeftPlayersCards();				//players cards comparing
 		
 		if(leftPlayers.size() < 2)				// if just one player remained
 		{
 			informWinner();
-			return;
 		}
 		else									// if more than one player remained
 		{
-			informAllPlayers("Draw, casino took your money :P", false);
-			nullBank();
+			informPlayersAboutDraw();
 		}
 		
 	}
 	
-	private void checkLeftPlayersCards()	//revision 32
-	{
-		playerFigure = new int[leftPlayers.size()]; 
-		
-		for(int i=0; i<4; i++)	//change on while maybe, max 4 cards or return will happen earlier
-		{	
-			for(int j=0; j<leftPlayers.size(); j++)
-				informConcretePlayer("Show your next highest figure", j, true);
-			
-			if(endOfCheckingCards)
-				return;
-			
-			int min = 15;
-			for(int j = 0; j < leftPlayers.size(); j++)		//find lowest figure
-			{
-				if(playerFigure[j] < min)
-					min = playerFigure[j];
-			}
 
-			for(int j = leftPlayers.size()-1; j>=0; j--)	//staying players with lowest figure
-			{
-				if(playerFigure[j] > min)
-					leftPlayers.remove(j);
-			}
-			
-			if(leftPlayers.size() < 2)				// if just one player remain
-				return;
-			
-		}
-	}
 	
 	/*_________________________________________________
 	 *             Working with cards part
@@ -657,4 +709,47 @@ public class Game
 		secondSuit.add(new Card(Integer.parseInt(color),Integer.parseInt(figure)));		
 		System.out.println("Card took back " +color + " " +figure);
 	}
+
+	private void checkLeftPlayersCards()	//revision 32
+	{
+		playerFigure = new int[leftPlayers.size()]; 
+		
+		for(int i=0; i<4; i++)	//change on while maybe, max 4 cards or return will happen earlier
+		{	
+			for(int j=0; j<leftPlayers.size(); j++)
+				informConcreteLeftPlayer("Show your next highest figure", j, true);
+			
+			if(endOfCheckingCards)
+				return;
+			
+			int min = 15;
+			for(int j = 0; j < leftPlayers.size(); j++)		//find lowest figure
+			{
+				if(playerFigure[j] < min)
+					min = playerFigure[j];
+			}
+
+			for(int j = leftPlayers.size()-1; j>=0; j--)	//staying players with lowest figure
+			{
+				if(playerFigure[j] > min)
+					leftPlayers.remove(j);
+			}
+			
+			if(leftPlayers.size() < 2)				// if just one player remain
+				return;
+			
+		}
+	}
+
+	private void showWinnersCardsForAllPlayers()			//revision 33
+	{
+		informConcreteLeftPlayer("Show your combination", 0, true);
+		
+		for(int i = 0; i < players.size(); i++)
+		{
+			informAllPlayers("Winner combination " + winnerCombination, false);
+		}
+	}
+	
+	
 }
