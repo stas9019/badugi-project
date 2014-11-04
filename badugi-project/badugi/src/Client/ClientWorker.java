@@ -96,43 +96,48 @@ public class ClientWorker implements Runnable
 		        if(text.equals("Game starts!"))
 		        {
 		        	connectionFrame.setVisible(false);
-		        	
 		        	client.invokeGameFrame();
-		        	//client.initializeSuit();	    revision 32    	
+		        	GameFrame2.setGameStatus(text);
 		        }
 		        
 		        if(text.equals("New game"))
 		        {
-		        	//connectionFrame.setVisible(false);
-		        	
-		        	client.newGame();
-		        	//client.initializeSuit();	    revision 32    	
+		        	client.newGamePlayersChecking();
+		        }
+		       
+		        if(text.startsWith("Draw"))
+		        {
+		        	GameFrame2.setGameStatus(text);
+		        }
+		        
+		        if(text.equals("Are you All-In?"))
+		        {
+		        	System.out.println("famsdfmofsdmodsmiosd");
+		        	client.answerIfAllIn();
 		        }
 		        
 		        if(text.startsWith("Start cash "))
 		        {
 		        	int cash = Integer.parseInt(text.substring(11));
 		        	client.setPlayerMoney(cash);
-		        	System.out.println("Player cash "+cash);
+		        	GameFrame2.setGameStatus("Player cash "+cash);
 		        }
 		        
 		        if(text.startsWith("Small blind "))
 		        {
 		        	int smallBlind = Integer.parseInt(text.substring(12));
 		        	client.setBlinds(smallBlind);
-		        	System.out.println("Small blind "+smallBlind);
+		        	GameFrame2.setGameStatus("Small blind "+smallBlind);
 		        }
 		        
 		        if(text.startsWith("Dealer"))
 		        {
 		        	client.setAsDealer(true);
-		        	System.out.println("You are dealer");
 		        }
 		        
 		        if(text.startsWith("You are not dealer anymore"))//add to game class
 		        {
 		        	client.setAsDealer(false);
-		        	System.out.println("You are dealer");
 		        }
 		        
 		        if(text.equals("First card distribution"))
@@ -143,6 +148,7 @@ public class ClientWorker implements Runnable
 		        if(text.equals("You are winner!"))		//revision 32
 		        {
 		        	//show in status text
+		        	GameFrame2.setGameStatus(text);
 		        	client.gameOver();	
 		        }
 
@@ -178,6 +184,7 @@ public class ClientWorker implements Runnable
 		        if(text.startsWith("Auction "))
 		        {
 		        	int currentPot = Integer.parseInt(text.substring(8));
+		        	GameFrame2.setGameStatus("Auction");
 		        	client.auction(currentPot);
 		        }
 		        
@@ -186,19 +193,42 @@ public class ClientWorker implements Runnable
 		        	client.checkPot();
 		        }
 		        
+		        if(text.startsWith("Your real pot?"))
+				{
+		        	client.checkRealPot();
+				}
+		        
 		        if(text.startsWith("Change cards"))
 		        {
+		        	GameFrame2.setGameStatus("You can change cards");
 		        	client.cardChangingStage();
 		        }
 		        
 		        if(text.startsWith("Your won! "))		//revision 32
 		        {
+		        	client.setAsWinner(true);
+		        	GameFrame2.setGameStatus(text);
 		        	int bank = Integer.parseInt(text.substring(10));
 		        	client.getBank(bank);
 		        }
 		        
-		        
+		        if(text.startsWith("Take back "))		//revision 32
+		        {
+		        	GameFrame2.setGameStatus(text);
+		        	int bank = Integer.parseInt(text.substring(10));
+		        	client.getBank(bank);
+		        }
+		        if(text.startsWith("Show your combination"))		//revision 32
+		        {
+		        	client.showYourCombination();
+		        }
 		       
+		        if(text.startsWith("Winner combination"))		//revision 32
+		        {
+		        	if(!client.isWinner)
+		        		GameFrame2.setGameStatus(text);
+		        }
+		        
 			}      
     }
 

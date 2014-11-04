@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Random;
 
 
 //import badugi.Card;	revision 32
@@ -19,13 +20,13 @@ import java.util.Comparator;
  * Make ClientWorker class, which analyze players commands 
  */
 
-public class Client{
+public class Bot extends Client{
 
 	private Socket socket = null;
 	private ClientWorker clientWorker;
 	private PrintWriter out = null;
 	
-	private static boolean notBot = false;			
+	
 	
 	private ArrayList<Card> playerHand = new ArrayList<Card>();
 	
@@ -37,7 +38,7 @@ public class Client{
 	private int currentPot 	= 0;
 	private int playerPot 	= 0;
 	
-
+	//private boolean isDealer = false;
 	private boolean isAllIn = false;	
 	private boolean isFold = false;		//revision 30
 	protected boolean isWinner = false;
@@ -45,22 +46,24 @@ public class Client{
 	private ConnectionFrame connectionFrame;
 	private GameFrame2 		gameFrame;
 	
-	/*Singleton pattern used*/
-	public Client()
-	{
-		if(notBot)												//revision 33
-			connectionFrame = new ConnectionFrame(this); 
+	public Random random = new Random();
+	
+	Bot()
+	{		
+		//super();
+		connectionFrame = new ConnectionFrame(this); 
 	}
+	
 	
 	/*_________________________________________________
 	 *             Connection with server part
 	 *_________________________________________________*/
 	
+	
 	protected void connectionAttempt(String adress, String port)
 	{
 		try
 		{
-			
 			socket = new Socket(adress, Integer.parseInt(port));
 			
 			try
@@ -183,8 +186,8 @@ public class Client{
 		}
 		
 		System.out.println("Player can change cards");//all system.out to status bar
-		gameFrame.blockCheckBoxes(false);
-		gameFrame.blockChangeButton(false);
+		sendQueryToServer("End of changing");
+
 	}
 	
 	protected void changeCards(int index)
@@ -336,8 +339,11 @@ public class Client{
 	
 	protected void auction(int pot)
 	{
+	
 		currentPot = pot;
 		gameFrame.setCurrentPot(pot);
+		
+		blockGameFrame(true);
 		
 		if(isAllIn)
 		{
@@ -352,52 +358,87 @@ public class Client{
 		
 		if(playerMoney < currentPot)
 		{
-			gameFrame.blockCallButton(true);
+			switch(random.nextInt(2))
+			{
+				case 0: fold();break;
+				case 1: allIn();break;
+			}
+			return;
+			/*gameFrame.blockCallButton(true);
 			gameFrame.blockRaiseButton(true);
 			gameFrame.blockCheckButton(true);
 			gameFrame.blockYourBidField(true);
 			
 			gameFrame.blockAllInButton(false);
-			gameFrame.blockFoldButton(false);
+			gameFrame.blockFoldButton(false);*/
 		}
 		if(playerMoney == currentPot)
 		{
-			gameFrame.blockCallButton(true);
+			
+			switch(random.nextInt(2))
+			{
+				case 0: check();break;
+				case 1: call();break;
+				//case 2: fold();break;	
+			}
+			
+			return;
+			/*gameFrame.blockCallButton(true);
 			gameFrame.blockRaiseButton(true);
 			gameFrame.blockYourBidField(true);
 			
 			gameFrame.blockFoldButton(false);
 			gameFrame.blockCheckButton(false);
 			gameFrame.blockCallButton(false);
-			gameFrame.blockAllInButton(false);
+			gameFrame.blockAllInButton(false);*/
 			
 		}
 		if(playerMoney > currentPot)
 		{
-			blockGameFrame(false);
+			switch(random.nextInt(2))
+			{
+				case 0: check();break;
+				case 1: call();break;
+				//case 2: fold();break;	
+			}
+			
+			return;
+			//blockGameFrame(false);
 		}
 		
 		if(playerPot == currentPot)
 		{
-			gameFrame.blockCallButton(true);
+			
+			check();
+			return;
+			/*gameFrame.blockCallButton(true);
 			
 			gameFrame.blockCheckButton(false);
 			gameFrame.blockRaiseButton(false);
 			gameFrame.blockYourBidField(false);
-			gameFrame.blockAllInButton(false);
+			gameFrame.blockAllInButton(false);*/
 		}
 		
 		if((playerPot < currentPot)&&(playerMoney+playerPot < currentPot))
 		{
-			gameFrame.blockCheckButton(true);
+			fold();
+			return;
+			/*gameFrame.blockCheckButton(true);
 			
 			gameFrame.blockAllInButton(false);
-			gameFrame.blockFoldButton(false);
+			gameFrame.blockFoldButton(false);*/
 		}
 		
 		if((playerPot < currentPot)&&(playerMoney+playerPot >= currentPot))
 		{
-			gameFrame.blockCheckButton(true);
+			
+			switch(random.nextInt(2))
+			{
+				case 0: fold();break;
+				case 1: call();break;
+			}
+			return;
+			/*gameFrame.blockCheckButton(true);
 			
 			gameFrame.blockCallButton(false);
 			gameFrame.blockAllInButton(false);
@@ -407,27 +448,34 @@ public class Client{
 			{
 				gameFrame.blockRaiseButton(false);
 				gameFrame.blockYourBidField(false);
-			}
+			}*/
 		
 		}
 		
 		if((playerMoney == 0) && (playerPot == currentPot))
 		{
-			gameFrame.blockCheckButton(false);
+			check();
+			return;
+			//gameFrame.blockCheckButton(false);
 		}
 		
 		if((playerMoney == 0) && (playerPot < currentPot))
 		{
-			gameFrame.blockCheckButton(true);
+				allIn();
+				return;
+			/*gameFrame.blockCheckButton(true);
 			
-			gameFrame.blockAllInButton(false);
+			gameFrame.blockAllInButton(false);*/
 		}
 		
 		if(playerPot+playerMoney <= currentPot)
 		{
-			gameFrame.blockCallButton(true);
-			
-			gameFrame.blockAllInButton(false);
+			switch(random.nextInt(2))
+			{
+				case 0: fold();break;
+				case 1: allIn();break;
+			}
+			return;
 		}
 	}
 
@@ -728,7 +776,8 @@ public class Client{
 		if(playerMoney == 0)		//revision 33
 			System.exit(0);			//or invoke Connection Frame
 		
-		gameFrame.blockReadyButton(false);
+		sendQueryToServer("Ready");
+		//gameFrame.blockReadyButton(false);
 	}
 	
 	protected void gameOver()		//revision 32 //maybe for victory and loss  also
@@ -778,11 +827,7 @@ public class Client{
 	
 	public static void main(String[] args) 
 	{
-		
-		notBot = true;
-		new Client();
-		//newFrame(new Client(););
-		//connectionFrame = new ConnectionFrame(this); 
+		new Bot();
 	}
 
 
