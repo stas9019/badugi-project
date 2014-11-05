@@ -112,7 +112,6 @@ public class ClientWorker implements Runnable
 		        
 		        if(text.equals("Are you All-In?"))
 		        {
-		        	System.out.println("famsdfmofsdmodsmiosd");
 		        	client.answerIfAllIn();
 		        }
 		        

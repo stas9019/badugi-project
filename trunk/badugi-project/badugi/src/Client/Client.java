@@ -725,9 +725,11 @@ public class Client{
 	
 	protected void newGamePlayersChecking()	//revision 32
 	{
-		if(playerMoney == 0)		//revision 33
+		if(playerMoney == 0)	
+		{//revision 33
+			sendQueryToServer("I lost");
 			System.exit(0);			//or invoke Connection Frame
-		
+		}
 		gameFrame.blockReadyButton(false);
 	}
 	
