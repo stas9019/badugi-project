@@ -245,6 +245,13 @@ public class Game
 				return;
 			}
 			
+			if(text.equals("I lost"))
+			{
+				players.remove(player);
+				return;
+			}
+			
+			
 			if(text.startsWith("Take card back "))
 			{			
 				String color = String.valueOf(text.charAt(15));
@@ -502,18 +509,24 @@ public class Game
 			secondSuit.clear();				//revision 32
 			leftPlayers.clear();
 			
-			if(players.size() < 2)
-			{
-				informConcretePlayer("You are winner!", 0, false);
-				break;
-			}
+			
 			
 			leftPlayers = new ArrayList<Socket>(players);//makes just reference, not copy, but makes the same size to make a copy in next step
 			Collections.copy(leftPlayers, players);	//revision 33
 			
 			
 			initializeSuit();					
-			informAllPlayers("New game", true);
+			//informAllPlayers("New game", true);
+			
+			for(int i = players.size()-1; i>=0; i--)
+				informConcretePlayer("New game",i, true);			//revision 34 cause some players can leave game in this moment
+			
+			if(players.size() < 2)
+			{
+				informConcretePlayer("You are winner!", 0, false);
+				break;
+			}
+			
 			
 			informAllPlayers("First card distribution", true);
 			
@@ -592,9 +605,11 @@ public class Game
 				{
 					informConcretePlayer("Your real pot?", i, true);
 					if(allInWinnerPot < playerPot)
+					{
 						informConcretePlayer("Take back "+(playerPot - allInWinnerPot), i, false);
 					
-					bank-=(playerPot - allInWinnerPot);
+						bank-=(playerPot - allInWinnerPot);
+					}
 				}
 			}
 			informConcreteLeftPlayer("Your won! "+bank, 0, false);
