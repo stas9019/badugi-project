@@ -8,16 +8,11 @@ import java.util.Collections;
 import java.util.Comparator;
 
 
-//import badugi.Card;	revision 32
-
-/*
- * This is client's Logic Layer
- * 
- * TO DO 
- * Client's GUI: First Frame - Connection Frame, Second - Game Frame
- * Establishing connection by IP and port in Connection Frame
- * Make ClientWorker class, which analyze players commands 
- */
+/**
+* 
+*
+* @author Stas Zamana
+*/
 
 public class Client{
 
@@ -30,17 +25,17 @@ public class Client{
 	private ArrayList<Card> playerHand = new ArrayList<Card>();
 	
 	
-	private int playerMoney = 0;
-	private int cardCounter = 0; 			
-	private int smallBlind 	= 0;
-	private int bigBlind 	= 0;
-	private int currentPot 	= 0;
-	private int playerPot 	= 0;
+	private int playerMoney;
+	private int cardCounter; 			
+	private int smallBlind;
+	private int bigBlind;
+	private int currentPot;
+	private int playerPot;
 	
 
-	private boolean isAllIn = false;	
-	private boolean isFold = false;		//revision 30
-	protected boolean isWinner = false;
+	private transient boolean isAllIn;	
+	private transient boolean isFold;		//revision 30
+	protected boolean isWinner;
 	
 	private ConnectionFrame connectionFrame;
 	private GameFrame2 		gameFrame;
@@ -48,8 +43,10 @@ public class Client{
 	/*Singleton pattern used*/
 	public Client()
 	{
-		if(notBot)												//revision 33
+		if(notBot)	
+		{														//revision 33
 			connectionFrame = new ConnectionFrame(this); 
+		}
 	}
 	
 	/*_________________________________________________
@@ -81,6 +78,7 @@ public class Client{
 	    }
 		catch (IOException e)
 		{
+			connectionFrame.setOutputText("I/O Exception");
 		}
 	    catch(NullPointerException e)
 		{
@@ -106,9 +104,9 @@ public class Client{
 	 *_________________________________________________*/
 
 	
-	protected void takeNewCard(String color, String figure)
+	protected void takeNewCard(final String color, final String figure)
 	{
-		Card newCard = new Card(Integer.parseInt(color),Integer.parseInt(figure));
+		final Card newCard = new Card(Integer.parseInt(color),Integer.parseInt(figure));
 		playerHand.add(newCard);
 		//prepareCardView(newCard);				//revision 30
 		//cardCounter++; //revision 32
@@ -137,6 +135,7 @@ public class Client{
 				view="♣";color=Color.BLACK;break;
 			case 4:
 				view="♠";color=Color.BLACK;break;
+			default:view="";
 		}
 		
 		view+=" ";
@@ -203,8 +202,8 @@ public class Client{
 		
 		Collections.sort(playerHand, new Comparator<Card>() {								
             @Override
-            public int compare(Card o1, Card o2) {
-                return String.valueOf(o1.getCardColor()).compareTo(String.valueOf(o2.getCardColor()));		//cause cannot compare by primitive type integer
+            public int compare(Card card1, Card card2) {
+                return String.valueOf(card1.getCardColor()).compareTo(String.valueOf(card2.getCardColor()));		//cause cannot compare by primitive type integer
             }
         });
 	}
@@ -316,7 +315,9 @@ public class Client{
 			sendQueryToServer("Small Blind");
 		}
 		else
+		{
 			allIn();
+		}
 	}
 	
 	protected void betBigBlind()
@@ -387,7 +388,7 @@ public class Client{
 			gameFrame.blockAllInButton(false);
 		}
 		
-		if((playerPot < currentPot)&&(playerMoney+playerPot < currentPot))
+		if(playerMoney+playerPot < currentPot)	//if((playerPot < currentPot)&&(playerMoney+playerPot < currentPot))
 		{
 			gameFrame.blockCheckButton(true);
 			
@@ -458,20 +459,25 @@ public class Client{
 		blockGameFrame(true);
 	}
 	
-	protected void raise(int bid)
+	protected void raise(int bid)//revision 35
 	{
-		int diff = bid - playerPot;
-		playerMoney+=playerPot;
-		playerMoney-=bid;		
-		playerPot=bid;
-		
-		gameFrame.setYourMoney(String.valueOf(playerMoney));
-		gameFrame.setYourPot(playerPot);
-		gameFrame.setCurrentPot(bid);
-		
-		sendQueryToServer("Raise "+bid);
-		sendQueryToServer("Difference Raise "+diff);
-		blockGameFrame(true);
+		if(bid > currentPot)
+		{
+			int diff = bid - playerPot;
+			playerMoney+=playerPot;
+			playerMoney-=bid;		
+			playerPot=bid;
+			
+			gameFrame.setYourMoney(String.valueOf(playerMoney));
+			gameFrame.setYourPot(playerPot);
+			gameFrame.setCurrentPot(bid);
+			
+			sendQueryToServer("Raise "+bid);
+			sendQueryToServer("Difference Raise "+diff);
+			blockGameFrame(true);
+		}
+		else
+			setGameStatus("Wrong sum to raise");
 	}
 	
 	protected void fold()
@@ -542,9 +548,13 @@ public class Client{
 	protected void checkPot()
 	{
 		if(!isAllIn && !isFold)//was before(playerMoney != 0)
+		{
 			sendQueryToServer(String.valueOf(playerPot));
+		}
 		else
-			sendQueryToServer("-1");	
+		{
+			sendQueryToServer("-1");
+		}
 	}
 	
 	protected void checkRealPot()
@@ -683,8 +693,9 @@ public class Client{
 		clearCardView();
 		
 		for(int i=0; i<playerHand.size(); i++)
+		{
 			prepareCardView(playerHand.get(i), i);
-		
+		}
 		cardCounter = playerHand.size();
 
 		
@@ -725,12 +736,13 @@ public class Client{
 	
 	protected void newGamePlayersChecking()	//revision 32
 	{
-		if(playerMoney == 0)	
+		if(playerMoney == 0)				//revision 35
 		{//revision 33
 			sendQueryToServer("I lost");
-			System.exit(0);			//or invoke Connection Frame
+			//System.exit(0);			//or invoke Connection Frame
 		}
-		gameFrame.blockReadyButton(false);
+		else
+			gameFrame.blockReadyButton(false);
 	}
 	
 	protected void gameOver()		//revision 32 //maybe for victory and loss  also
@@ -759,6 +771,11 @@ public class Client{
 	}
 
 	
+	protected void setGameStatus(String status)
+	{
+		gameFrame.setGameStatus(status);
+	}
+	
 	protected void invokeGameFrame()
 	{
 		//connectionFrame.dispose();
@@ -767,7 +784,7 @@ public class Client{
 	}
 	
 	
-	protected void blockGameFrame(boolean b)
+	protected void blockGameFrame(final boolean b)
 	{
 		gameFrame.blockCallButton(b);
 		gameFrame.blockRaiseButton(b);

@@ -10,8 +10,11 @@ import java.net.UnknownHostException;
 /*TO-DO
  * Finalize method
  * */
-
-
+/**
+* 
+*
+* @author Stas Zamana
+*/
 public class ClientWorker implements Runnable
 {
 	
@@ -30,15 +33,7 @@ public class ClientWorker implements Runnable
 		
 		connectionFrame = client.getConnectionFrame();
 	}
-	
-	/*public void sayToClient(String answer)
-	{
-		
-		out.println(answer);
-		System.out.println("Client worker " +answer);
-	}*/
-	
-	
+
 	public void listenSocket() throws NullPointerException
 	{
 		
@@ -97,7 +92,7 @@ public class ClientWorker implements Runnable
 		        {
 		        	connectionFrame.setVisible(false);
 		        	client.invokeGameFrame();
-		        	GameFrame2.setGameStatus(text);
+		        	client.setGameStatus(text);
 		        }
 		        
 		        if(text.equals("New game"))
@@ -107,7 +102,7 @@ public class ClientWorker implements Runnable
 		       
 		        if(text.startsWith("Draw"))
 		        {
-		        	GameFrame2.setGameStatus(text);
+		        	client.setGameStatus(text);
 		        }
 		        
 		        if(text.equals("Are you All-In?"))
@@ -119,14 +114,14 @@ public class ClientWorker implements Runnable
 		        {
 		        	int cash = Integer.parseInt(text.substring(11));
 		        	client.setPlayerMoney(cash);
-		        	GameFrame2.setGameStatus("Player cash "+cash);
+		        	client.setGameStatus("Player cash "+cash);
 		        }
 		        
 		        if(text.startsWith("Small blind "))
 		        {
 		        	int smallBlind = Integer.parseInt(text.substring(12));
 		        	client.setBlinds(smallBlind);
-		        	GameFrame2.setGameStatus("Small blind "+smallBlind);
+		        	client.setGameStatus("Small blind "+smallBlind);
 		        }
 		        
 		        if(text.startsWith("Dealer"))
@@ -147,7 +142,7 @@ public class ClientWorker implements Runnable
 		        if(text.equals("You are winner!"))		//revision 32
 		        {
 		        	//show in status text
-		        	GameFrame2.setGameStatus(text);
+		        	client.setGameStatus(text);
 		        	client.gameOver();	
 		        }
 
@@ -165,7 +160,7 @@ public class ClientWorker implements Runnable
 		        //!!!   Format is like "New card x y" where x - card color, y - card figure
 		        if(text.startsWith("New card"))
 		        {
-		        	String color = String.valueOf(text.charAt(9));
+		        	final String color = String.valueOf(text.charAt(9));
 		        	String figure = text.substring(11);	
 		        	client.takeNewCard(color, figure);
 		        }
@@ -183,7 +178,7 @@ public class ClientWorker implements Runnable
 		        if(text.startsWith("Auction "))
 		        {
 		        	int currentPot = Integer.parseInt(text.substring(8));
-		        	GameFrame2.setGameStatus("Auction");
+		        	client.setGameStatus("Auction");
 		        	client.auction(currentPot);
 		        }
 		        
@@ -199,21 +194,21 @@ public class ClientWorker implements Runnable
 		        
 		        if(text.startsWith("Change cards"))
 		        {
-		        	GameFrame2.setGameStatus("You can change cards");
+		        	client.setGameStatus("You can change cards");
 		        	client.cardChangingStage();
 		        }
 		        
 		        if(text.startsWith("Your won! "))		//revision 32
 		        {
 		        	client.setAsWinner(true);
-		        	GameFrame2.setGameStatus(text);
+		        	client.setGameStatus(text);
 		        	int bank = Integer.parseInt(text.substring(10));
 		        	client.getBank(bank);
 		        }
 		        
 		        if(text.startsWith("Take back "))		//revision 32
 		        {
-		        	GameFrame2.setGameStatus(text);
+		        	client.setGameStatus(text);
 		        	int bank = Integer.parseInt(text.substring(10));
 		        	client.getBank(bank);
 		        }
@@ -225,7 +220,9 @@ public class ClientWorker implements Runnable
 		        if(text.startsWith("Winner combination"))		//revision 32
 		        {
 		        	if(!client.isWinner)
-		        		GameFrame2.setGameStatus(text);
+		        	{
+		        		client.setGameStatus(text);
+		        	}
 		        }
 		        
 			}      
