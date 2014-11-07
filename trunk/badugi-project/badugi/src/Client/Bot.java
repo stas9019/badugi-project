@@ -9,16 +9,11 @@ import java.util.Comparator;
 import java.util.Random;
 
 
-//import badugi.Card;	revision 32
-
-/*
- * This is client's Logic Layer
- * 
- * TO DO 
- * Client's GUI: First Frame - Connection Frame, Second - Game Frame
- * Establishing connection by IP and port in Connection Frame
- * Make ClientWorker class, which analyze players commands 
- */
+/**
+* 
+*
+* @author Stas Zamana
+*/
 
 public class Bot extends Client{
 
@@ -26,22 +21,21 @@ public class Bot extends Client{
 	private ClientWorker clientWorker;
 	private PrintWriter out = null;
 	
-	
-	
+
 	private ArrayList<Card> playerHand = new ArrayList<Card>();
 	
 	
-	private int playerMoney = 0;
-	private int cardCounter = 0; 			
-	private int smallBlind 	= 0;
-	private int bigBlind 	= 0;
-	private int currentPot 	= 0;
-	private int playerPot 	= 0;
+	private int playerMoney;
+	private int cardCounter; 			
+	private int smallBlind;
+	private int bigBlind;
+	private int currentPot;
+	private int playerPot;
 	
 	//private boolean isDealer = false;
-	private boolean isAllIn = false;	
-	private boolean isFold = false;		//revision 30
-	protected boolean isWinner = false;
+	private boolean isAllIn;	
+	private boolean isFold;		//revision 30
+	protected boolean isWinner;
 	
 	private ConnectionFrame connectionFrame;
 	private GameFrame2 		gameFrame;
@@ -595,6 +589,11 @@ public class Bot extends Client{
 			sendQueryToServer("-1");	
 	}
 	
+	protected void setGameStatus(String status)
+	{
+		gameFrame.setGameStatus(status);
+	}
+	
 	protected void checkRealPot()
 	{
 			sendQueryToServer("Real pot " + playerPot);
@@ -773,10 +772,13 @@ public class Bot extends Client{
 	
 	protected void newGamePlayersChecking()	//revision 32
 	{
-		if(playerMoney == 0)		//revision 33
-			System.exit(0);			//or invoke Connection Frame
-		
-		sendQueryToServer("Ready");
+		if(playerMoney == 0)
+		{
+			sendQueryToServer("I lost");
+			//System.exit(0);			//or invoke Connection Frame
+		}
+		else
+			sendQueryToServer("Ready");
 		//gameFrame.blockReadyButton(false);
 	}
 	

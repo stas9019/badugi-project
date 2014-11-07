@@ -9,6 +9,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+
+/**
+* 
+*
+* @author Stas Zamana
+* @author Joanna Kowalska
+*/
+
 public class ConnectionFrame extends JFrame implements ActionListener
 {
 	/**

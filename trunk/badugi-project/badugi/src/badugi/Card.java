@@ -7,7 +7,7 @@ public class Card // implements Comparable<Card>
 	private int color;
 	private int figure;
 	
-	private boolean marked = false;
+	//private boolean marked;
 	
 	protected Card(int colour, int figure)
 	{
@@ -15,7 +15,7 @@ public class Card // implements Comparable<Card>
 		this.figure = figure;
 	}
 	
-	protected void markCard()
+	/*protected void markCard()
 	{
 		marked = true;
 	}
@@ -23,7 +23,7 @@ public class Card // implements Comparable<Card>
 	protected void isMarked()
 	{
 		marked = false;
-	}
+	}*/
 	/*
 	 * set and get functions to card color and figure
 	 */

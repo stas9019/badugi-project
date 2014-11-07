@@ -21,7 +21,7 @@ public class Game
 	private int allInWinnerPot;
 	
 	private boolean winnerIsAllIn;			//revision 33
-	private boolean endOfCheckingCards;		//revision 32
+	private boolean endOfCheck;		//revision 32
 	
 	private String winnerCombination;
 	
@@ -87,18 +87,7 @@ public class Game
 				}
 				catch (NullPointerException e)
 				{
-					playerDisconected(i);				// revision 30
-					
-					/*System.out.println("Client " +i +" disconected");
-					players.remove(i);
-					
-					??not working with many players, maybe cause remove not very fast 
-					if(players.size() < 2)
-					{
-						System.out.println("Game over - just one player remain");
-						System.exit(0);
-					}*/
-						
+					playerDisconected(i);				// revision 30						
 				}
 				
 			}
@@ -363,7 +352,7 @@ public class Game
 			
 			if(text.equals("No more cards left"))		//revision 32
 	        {	
-				endOfCheckingCards = true;	        	
+				endOfCheck = true;	        	
 	        	return;
 	        }
 			
@@ -392,7 +381,6 @@ public class Game
 			
 		}
 	}
-
 	
 	private boolean checkPotsOfAllLeftPlayers()
 	{
@@ -504,7 +492,7 @@ public class Game
 			winnerCombination = "";
 			playerColor = null;
 			playerFigure = null;
-			endOfCheckingCards = false;		//revision 32
+			endOfCheck = false;		//revision 32
 			winnerIsAllIn = false;			//revision 33
 			secondSuit.clear();				//revision 32
 			leftPlayers.clear();
@@ -695,8 +683,10 @@ public class Game
 	/*Maybe can be with integer parameter for changing cards also*/
 	private void startCardsDistribution(PrintWriter out, int amount)
 	{
-		if(suit.size() < amount)						//revision 30
+		if(suit.size() < amount)
+		{//revision 30
 			suit = new ArrayList<Card>(secondSuit);
+		}
 		
 		for(int i=0; i < amount; i++)
 		{
@@ -732,9 +722,11 @@ public class Game
 		for(int i=0; i<4; i++)	//change on while maybe, max 4 cards or return will happen earlier
 		{	
 			for(int j=0; j<leftPlayers.size(); j++)
+			{
 				informConcreteLeftPlayer("Show your next highest figure", j, true);
+			}
 			
-			if(endOfCheckingCards)
+			if(endOfCheck)
 				return;
 			
 			int min = 15;

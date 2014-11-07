@@ -17,14 +17,12 @@ import javax.swing.JLabel;
 //import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-	/*
-	 * To Add:
-	 * Dealer/smallBlind/bigBlind
-	 * make Status bar which will inform about some general processes f.ex. card changing, some player made pot ... etc
-	 * player pot					change places of current pot and player pot
-	 * time left label(not necessary, maybe if we will have time to do this)
-	 * if we leaving text labels on cards, it can look better with bigger size and colors
-	 */
+/**
+* 
+*
+* @author Stas Zamana
+* @author Joanna Kowalska
+*/
 
 public class GameFrame2 extends JFrame implements ActionListener
 {
@@ -222,7 +220,7 @@ public class GameFrame2 extends JFrame implements ActionListener
 	 *            Set/get functions part
 	 *_________________________________________________*/
 	
-	protected static void setGameStatus(String status)		//revision 33
+	protected void setGameStatus(String status)		//revision 35
 	{
 		lStatusBar.setText(status);
 	}
