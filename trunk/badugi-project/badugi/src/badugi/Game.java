@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
 public class Game
@@ -21,11 +22,11 @@ public class Game
 	private int allInWinnerPot;
 	
 	private boolean winnerIsAllIn;			//revision 33
-	private boolean endOfCheck;		//revision 32
+	//private boolean endOfCheck;		//revision 37
 	
 	private String winnerCombination;
 	
-	private int playerColor[];
+	private int playersColors[];
 	private int playerFigure[];
 	
 	private ArrayList<Socket> players;
@@ -34,7 +35,7 @@ public class Game
 	private ArrayList<Card> suit = new ArrayList<Card>();
 	private ArrayList<Card> secondSuit = new ArrayList<Card>();
 	
-
+	private ArrayList<ArrayList<Card>> playersHands = new ArrayList<ArrayList<Card>>();
 
 	public Random random = new Random();
 	
@@ -173,7 +174,7 @@ public class Game
 		{
 				out = new PrintWriter(leftPlayers.get(playerNum).getOutputStream(), true);
 			
-			System.out.println("Informing concrete Player "+playerNum +": "+ phrase);			
+			System.out.println("Informing concrete Left Player "+playerNum +": "+ phrase);			
 			out.println(phrase);	
 			
 			if(waitForAnswer)
@@ -337,7 +338,7 @@ public class Game
 			if(text.startsWith("My colors "))		//revision 32
 	        {	
 	        	int colorsNum = Integer.parseInt(text.substring(10));	        	
-	        	playerColor[leftPlayers.indexOf(player)] = colorsNum;
+	        	playersColors[leftPlayers.indexOf(player)] = colorsNum;
 	        	
 	        	return;
 	        }
@@ -350,9 +351,26 @@ public class Game
 	        	return;
 	        }
 			
-			if(text.equals("No more cards left"))		//revision 32
+			if(text.startsWith("My card "))		//revision 37
 	        {	
-				endOfCheck = true;	        	
+	        	int color = Integer.parseInt(String.valueOf(text.charAt(8)));
+	        	int figure = Integer.parseInt(text.substring(10));
+
+	        	if(checkPlayerCard(color, figure))
+	        	{
+	        		playersHands.get(playersHands.size()-1).add(new Card(color, figure));
+	        	}
+	        	else
+	        	{
+	        		informConcretePlayer("You're cheater!", players.indexOf(player), false);
+	        		leftPlayers.remove(player);
+	        		players.remove(player);
+	        		playersHands.remove(playersHands.size()-1);
+	        	}
+	        }
+			
+			if(text.equals("No more cards left"))		//revision 37
+	        {	      	
 	        	return;
 	        }
 			
@@ -490,12 +508,14 @@ public class Game
 		{			
 			/*null/false/clear all variables and arrays*/
 			winnerCombination = "";
-			playerColor = null;
+			playersColors = null;
 			playerFigure = null;
-			endOfCheck = false;		//revision 32
+			
+			//endOfCheck = false;		//revision 37
 			winnerIsAllIn = false;			//revision 33
 			secondSuit.clear();				//revision 32
 			leftPlayers.clear();
+			playersHands.clear();
 			
 			
 			
@@ -617,26 +637,36 @@ public class Game
 		currentPot = 0;
 	}
 	
-	private void finalStage()		// revision 32
+	private void finalStage()		// revision 37
 	{
 		
-		playerColor = new int[leftPlayers.size()];					//revision 32 null it after every round
-
-		for(int i = 0; i < leftPlayers.size(); i++)
+		for(int i = leftPlayers.size()-1; i>=0; i--)
 		{
-			informConcreteLeftPlayer("How many different colors do you have?", i, true);
+			playersHands.add(new ArrayList<Card>());
+			informConcreteLeftPlayer("Show your cards", i, true);			
+		}
+		
+		playersColors = new int[leftPlayers.size()];
+		
+		for(int i = leftPlayers.size()-1; i>=0; i--)
+		{
+			playersColors[i] = answerHowMuchColors(playersHands.get(i));
 		}
 
 		int max = 0;
 		for(int i = 0; i < leftPlayers.size(); i++)		//find max amount of different colors on players hands 
 		{
-			if(playerColor[i] > max)
-				max = playerColor[i];
+			if(playersColors[i] > max)
+				max = playersColors[i];
 		}
 		for(int i = leftPlayers.size()-1; i>=0; i--)	//leave players with max unique colors
 		{
-			if(playerColor[i] < max)
+			if(playersColors[i] < max)
+			{
 				leftPlayers.remove(i);
+				playersHands.remove(i);
+			}
+				
 		}
 		
 		if(leftPlayers.size() < 2)				// if just one player remain
@@ -680,7 +710,6 @@ public class Game
 		Collections.shuffle(suit, new Random(seed));		//shuffle suit, cause random sometimes behaves bit strange
 	}
 	
-	/*Maybe can be with integer parameter for changing cards also*/
 	private void startCardsDistribution(PrintWriter out, int amount)
 	{
 		if(suit.size() < amount)
@@ -718,16 +747,14 @@ public class Game
 	private void checkLeftPlayersCards()	//revision 32
 	{
 		playerFigure = new int[leftPlayers.size()]; 
+		int lim = playersHands.get(0).size();
 		
-		for(int i=0; i<4; i++)	//change on while maybe, max 4 cards or return will happen earlier
-		{	
-			for(int j=0; j<leftPlayers.size(); j++)
+		for(int i=0; i<lim; i--)	// i - number of cards of each player in final(must be the same)
+		{							//starting from last card
+			for(int j=0; j<leftPlayers.size(); j++)// j - number of player
 			{
-				informConcreteLeftPlayer("Show your next highest figure", j, true);
+				playerFigure[j] = playersHands.get(j).get(i).getCardFigure();
 			}
-			
-			if(endOfCheck)
-				return;
 			
 			int min = 15;
 			for(int j = 0; j < leftPlayers.size(); j++)		//find lowest figure
@@ -739,7 +766,10 @@ public class Game
 			for(int j = leftPlayers.size()-1; j>=0; j--)	//staying players with lowest figure
 			{
 				if(playerFigure[j] > min)
+				{
 					leftPlayers.remove(j);
+					playersHands.remove(j);
+				}
 			}
 			
 			if(leftPlayers.size() < 2)				// if just one player remain
@@ -750,7 +780,7 @@ public class Game
 
 	private void showWinnersCardsForAllPlayers()			//revision 33
 	{
-		informConcreteLeftPlayer("Show your combination", 0, true);
+		informConcreteLeftPlayer("Show your victorious combination", 0, true);
 		
 		for(int i = 0; i < players.size(); i++)
 		{
@@ -758,5 +788,196 @@ public class Game
 		}
 	}
 	
+	/*Block was taken from Client class*/		// revision 37
+	
+	protected void sortCardsByColor(ArrayList<Card> playerHand)										
+	{
+		System.out.println("Order cards by color");
+		
+		Collections.sort(playerHand, new Comparator<Card>() {								
+            @Override
+            public int compare(Card card1, Card card2) {
+                return String.valueOf(card1.getCardColor()).compareTo(String.valueOf(card2.getCardColor()));		//cause cannot compare by primitive type integer
+            }
+        });
+	}
+	
+	protected void sortCardsByFigure(ArrayList<Card> playerHand)										// revision 32
+	{
+		
+		 System.out.println("Order cards by figure");
+		 
+		 Collections.sort(playerHand, new Comparator<Card>() 
+				 {
+		            @Override
+		            public int compare(Card o1, Card o2) 
+		            {
+		                return o1.getCardFigureLexic().compareTo(o2.getCardFigureLexic());		//cause cannot compare by primitive type integer
+		            }
+				 });
+	}
+	
+	protected int countMatchingColorsByColor(int color, ArrayList<Card> playerHand)	
+	{
+		int unUniqueColors = 0;
+		for(int i=0; i<3; i++)
+		{
+			if(playerHand.get(i).getCardColor() == color)
+				unUniqueColors++;				
+		}
+		return unUniqueColors;
+	}
+	
+	protected void removeMarkedCards(ArrayList<Card> playerHand)
+	{
+		for(int i=playerHand.size()-1; i>=0; i--)			// delete marked  
+		{
+			if(playerHand.get(i).isMarked())
+			{
+				playerHand.remove(i);
+			    //gameFrame.setCardView(i, "", null);
+			}
+		}
+	}
+	
+	protected int answerHowMuchColors(ArrayList<Card> playerHand)	
+	{
+		sortCardsByFigure(playerHand);
+		
+		for(int i=0; i<3; i++)	//find matching figures, mark less useful, after delete marked
+		{
+			if(playerHand.get(i).getCardFigure() == playerHand.get(i+1).getCardFigure())
+			{
+				if( countMatchingColorsByColor(playerHand.get(i).getCardColor(), playerHand) >= countMatchingColorsByColor(playerHand.get(i+1).getCardColor(), playerHand ))	
+				{
+					playerHand.get(i).markCard();
+				}
+				else
+				{
+					playerHand.get(i+1).markCard();
+				}
+			}
+		}
+		//System.out.println("Size before first removing "+playerHand.size());
+		removeMarkedCards(playerHand);		// delete marked  
+		//System.out.println("Size after first removing "+playerHand.size());
+		
+		sortCardsByFigure(playerHand);
+		sortCardsByColor(playerHand);
+		
+		int uniqueColors = 1;// was 0
+		
+		for(int i=0; i<playerHand.size()-1; i++)	
+		{
+			if(playerHand.get(i).getCardColor() != playerHand.get(i+1).getCardColor())
+				uniqueColors++;				
+		}
+		System.out.println("Unique colors "+uniqueColors);
+	
+		/*now, if some cards have same color, leave lowest card, remove others*/
+		
+		
+			/*just pair of the same colors */
+				/*3 colors - 4 cards*/
+				/*2 colors - 3 cards*/
+				/*1 color - 2 cards*/
+		if(uniqueColors == playerHand.size()-1)		
+		{	
+			for(int i=0; i<playerHand.size()-1; i++)
+			{
+				if(playerHand.get(i).getCardColor() == playerHand.get(i+1).getCardColor())
+				{
+						playerHand.get(i+1).markCard();//we know, that highest card is next
+				}
+					
+			}
+		}
+		
+		//removeMarkedCards(); ????
+		
+		/*triple of the same colors*/						
+			/*2 colors - 4cards, also can be two pairs*/
+			/*1 color - 3cards*/
+		if(uniqueColors == playerHand.size()-2)		
+		{	
+			/*is it case of two pairs?*/
+			if(playerHand.size()>3)		// two if's to make code more readable was!=
+			{
+					if(playerHand.get(1).getCardColor() != playerHand.get(2).getCardColor())//only in this case cards colors are not the same
+					{
+						playerHand.remove(3);
+						playerHand.remove(1);
+					}
+			}
+				if(playerHand.size() >= 3) // it means, that two cards were removed before//corrected  was <
+				{
+					for(int i=0; i<=1; i++)
+					{
+						if(playerHand.get(i).getCardColor() == playerHand.get(i+1).getCardColor())
+						{
+								playerHand.get(i+1).markCard();
+								if(playerHand.get(i+1).getCardColor() == playerHand.get(i+2).getCardColor())
+								{
+									playerHand.get(i+2).markCard();
+									break;
+								}
+						}
+							
+					}
+				}
+			
+		}
+		
+		//removeMarkedCards();	// if two cards were removed, no marked cards
+		
+		/*four cards of the same colors*/										
+		if(uniqueColors == playerHand.size()-3)		//is some card have same color, leave lowest 			revision 32
+		{		
+			playerHand.remove(3);
+			playerHand.remove(2);
+			playerHand.remove(1);
+		}
+		
+		removeMarkedCards(playerHand);	// delete marked again
+		
+		
+		
+		sortCardsByFigure(playerHand);
+		/*refresh all cards view
+		 * cards will be shown from lowest card to highest
+		 */
+		
+		return uniqueColors;
+		
+	}
+	
+	/*-------------------------------------------------------------------------*/
+	
+	protected boolean checkPlayerCard(int color, int figure)		// revision 37
+	{
+		for(int i = 0; i<suit.size(); i++)
+		{
+			if(suit.get(i).getCardFigure() == figure)
+			{
+				if(suit.get(i).getCardColor() == color)
+				{
+					return false;
+				}
+			}
+		}
+		
+		for(int i = 0; i<secondSuit.size(); i++)
+		{
+			if(secondSuit.get(i).getCardFigure() == figure)
+			{
+				if(secondSuit.get(i).getCardColor() == color)
+				{
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
 	
 }

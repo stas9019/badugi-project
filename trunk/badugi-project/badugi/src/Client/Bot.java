@@ -239,7 +239,7 @@ public class Bot extends Client{
 		}
 	}
 	
-	protected void showYourCombination()
+	protected void showYourVictoriousCombination()
 	{
 		String view="";
 		
@@ -617,7 +617,7 @@ public class Bot extends Client{
 		return unUniqueColors;
 	}
 	
-	protected void answerHowMuchColors()	//revision 32
+	protected void setFinalCardView()	//revision 32
 	{
 		sortCardsByFigure();
 		
