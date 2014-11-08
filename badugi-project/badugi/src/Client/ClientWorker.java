@@ -99,16 +99,6 @@ public class ClientWorker implements Runnable
 		        {
 		        	client.newGamePlayersChecking();
 		        }
-		       
-		        if(text.startsWith("Draw"))
-		        {
-		        	client.setGameStatus(text);
-		        }
-		        
-		        if(text.equals("Are you All-In?"))
-		        {
-		        	client.answerIfAllIn();
-		        }
 		        
 		        if(text.startsWith("Start cash "))
 		        {
@@ -123,6 +113,17 @@ public class ClientWorker implements Runnable
 		        	client.setBlinds(smallBlind);
 		        	client.setGameStatus("Small blind "+smallBlind);
 		        }
+		        
+		        if(text.startsWith("Bet small blind"))
+		        {
+		        	client.betSmallBlind();
+		        }
+		        
+		        if(text.startsWith("Bet big blind"))
+		        {
+		        	client.betBigBlind();
+		        }
+		        
 		        
 		        if(text.startsWith("Dealer"))
 		        {
@@ -139,40 +140,24 @@ public class ClientWorker implements Runnable
 		        	client.newGameStarted();	
 		        }
 		     
-		        if(text.equals("You are winner!"))		//revision 32
+		       /* if(text.equals("Show your next highest figure"))		//revision 32
 		        {
 		        	//show in status text
-		        	client.setGameStatus(text);
-		        	client.gameOver();	
-		        }
-
-		        if(text.equals("Show your next highest figure"))		//revision 32
-		        {
-		        	//show in status text
-		        	client.showNextHighestFigure();	
+		       
 		        }
 		        
 		        if(text.equals("How many different colors do you have?"))		//revision 32
 		        {
 		        	//show in status text
-		        	client.answerHowMuchColors();	
-		        }
+		        	client.setFinalCardView();	
+		        }*/
+		        
 		        //!!!   Format is like "New card x y" where x - card color, y - card figure
 		        if(text.startsWith("New card"))
 		        {
 		        	final String color = String.valueOf(text.charAt(9));
 		        	String figure = text.substring(11);	
 		        	client.takeNewCard(color, figure);
-		        }
-		        
-		        if(text.startsWith("Bet small blind"))
-		        {
-		        	client.betSmallBlind();
-		        }
-		        
-		        if(text.startsWith("Bet big blind"))
-		        {
-		        	client.betBigBlind();
 		        }
 		        
 		        if(text.startsWith("Auction "))
@@ -187,11 +172,7 @@ public class ClientWorker implements Runnable
 		        	client.checkPot();
 		        }
 		        
-		        if(text.startsWith("Your real pot?"))
-				{
-		        	client.checkRealPot();
-				}
-		        
+		       
 		        if(text.startsWith("Change cards"))
 		        {
 		        	client.setGameStatus("You can change cards");
@@ -206,17 +187,50 @@ public class ClientWorker implements Runnable
 		        	client.getBank(bank);
 		        }
 		        
+		        if(text.equals("You are winner!"))		//revision 32
+		        {
+		        	//show in status text
+		        	client.setGameStatus(text);
+		        	client.gameOver();	
+		        }
+
+		        
+		        if(text.startsWith("Draw"))
+		        {
+		        	client.setGameStatus(text);
+		        }
+		        
+		        if(text.equals("Are you All-In?"))
+		        {
+		        	client.answerIfAllIn();
+		        }
+		        
+		        if(text.startsWith("Your real pot?"))
+				{
+		        	client.checkRealPot();
+				}
+		        
 		        if(text.startsWith("Take back "))		//revision 32
 		        {
 		        	client.setGameStatus(text);
 		        	int bank = Integer.parseInt(text.substring(10));
 		        	client.getBank(bank);
 		        }
-		        if(text.startsWith("Show your combination"))		//revision 32
+		        
+		        
+		        
+		        
+		        if(text.startsWith("Show your victorious combination"))		//revision 32
 		        {
-		        	client.showYourCombination();
+		        	client.showYourVictoriousCombination();
 		        }
 		       
+		        if(text.startsWith("Show your cards"))		//revision 32
+		        {
+		        	client.showYourCards();
+		        	//client.setFinalCardView();	
+		        }
+		        
 		        if(text.startsWith("Winner combination"))		//revision 32
 		        {
 		        	if(!client.isWinner)

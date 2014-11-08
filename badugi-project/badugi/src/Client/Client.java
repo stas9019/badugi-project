@@ -26,7 +26,7 @@ public class Client{
 	
 	
 	private int playerMoney;
-	private int cardCounter; 			
+	//private int cardCounter; 	revision 37			
 	private int smallBlind;
 	private int bigBlind;
 	private int currentPot;
@@ -241,11 +241,24 @@ public class Client{
 		}
 	}
 	
-	protected void showYourCombination()
+	protected void showYourCards()
+	{
+		for(int i = 0; i < playerHand.size(); i++)
+		{
+			int color = playerHand.get(i).getCardColor();
+			int figure = playerHand.get(i).getCardFigure();
+			
+			sendQueryToServer("My card "+color+" "+figure);
+		}
+		sendQueryToServer("No more cards left");
+		setFinalCardView();
+	}
+	
+	protected void showYourVictoriousCombination()
 	{
 		String view="";
 		
-		for(int i =0; i<playerHand.size(); i++)
+		for(int i = 0; i<playerHand.size(); i++)
 		{
 
 			switch(playerHand.get(i).getCardColor())
@@ -580,7 +593,7 @@ public class Client{
 		return unUniqueColors;
 	}
 	
-	protected void answerHowMuchColors()	//revision 32
+	protected void setFinalCardView()	//revision 32
 	{
 		sortCardsByFigure();
 		
@@ -696,21 +709,21 @@ public class Client{
 		{
 			prepareCardView(playerHand.get(i), i);
 		}
-		cardCounter = playerHand.size();
+		//cardCounter = playerHand.size();
 
 		
-			sendQueryToServer("My colors "+uniqueColors);	
+			//sendQueryToServer("My colors "+uniqueColors);	
 		
 	}
 
-	protected void showNextHighestFigure()//revision 32
+	/*protected void showNextHighestFigure()//revision 32
 	{
 		cardCounter--;
 		if(cardCounter >= 0)
 			sendQueryToServer("My next highest figure "+playerHand.get(cardCounter).getCardFigure());
 		else
 			sendQueryToServer("No more cards left");
-	}
+	}*/
 	
 	
 	protected void newGameStarted()  //maybe other name
@@ -719,7 +732,7 @@ public class Client{
 		isAllIn = false;
 		isFold = false;
 		playerPot = 0;
-		cardCounter = 0;		//revision 32
+		//cardCounter = 0;		//revision 37
 		
 		playerHand.clear();		//revision 30
 		for(int i=3; i>=0; i--)			// revision 30   
