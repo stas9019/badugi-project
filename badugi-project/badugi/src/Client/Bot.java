@@ -331,6 +331,19 @@ public class Bot extends Client{
 			allIn();
 	}
 	
+	protected void showYourCards()
+	{
+		for(int i = 0; i < playerHand.size(); i++)
+		{
+			int color = playerHand.get(i).getCardColor();
+			int figure = playerHand.get(i).getCardFigure();
+			
+			sendQueryToServer("My card "+color+" "+figure);
+		}
+		sendQueryToServer("No more cards left");
+		setFinalCardView();
+	}
+	
 	protected void auction(int pot)
 	{
 	
@@ -732,10 +745,10 @@ public class Bot extends Client{
 		for(int i=0; i<playerHand.size(); i++)
 			prepareCardView(playerHand.get(i), i);
 		
-		cardCounter = playerHand.size();
+		//cardCounter = playerHand.size();
 
 		
-			sendQueryToServer("My colors "+uniqueColors);	
+			//sendQueryToServer("My colors "+uniqueColors);	
 		
 	}
 
