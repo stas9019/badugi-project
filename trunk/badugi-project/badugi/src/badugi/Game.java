@@ -749,7 +749,7 @@ public class Game
 		playerFigure = new int[leftPlayers.size()]; 
 		int lim = playersHands.get(0).size();
 		
-		for(int i=0; i<lim; i--)	// i - number of cards of each player in final(must be the same)
+		for(int i=lim-1; i>=0; i--)	// i - number of cards of each player in final(must be the same)
 		{							//starting from last card
 			for(int j=0; j<leftPlayers.size(); j++)// j - number of player
 			{
